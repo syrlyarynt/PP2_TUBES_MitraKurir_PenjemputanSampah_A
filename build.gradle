@@ -14,6 +14,11 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
     // https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
     implementation 'com.mysql:mysql-connector-j:9.1.0'
+// https://mvnrepository.com/artifact/com.miglayout/miglayout
+    implementation 'com.miglayout:miglayout:3.7.4'
+// https://mvnrepository.com/artifact/org.mybatis/mybatis
+    implementation 'org.mybatis:mybatis:3.5.17'
+
 
 }
 
