@@ -3,12 +3,12 @@ package kelompok4.praktikumpemrograman2.view;
 import javax.swing.*;
 import java.awt.*;
 
-public class ContohDua{
+public class MenerimaPermintaanView{
     private JPanel panel;
 
-    public ContohDua() {
+    public MenerimaPermintaanView() {
         panel = new JPanel(new BorderLayout());
-        JLabel label = new JLabel("Untuk Halaman 2", SwingConstants.CENTER);
+        JLabel label = new JLabel("Untuk Halaman 3", SwingConstants.CENTER);
         panel.add(label, BorderLayout.CENTER);
     }
 
