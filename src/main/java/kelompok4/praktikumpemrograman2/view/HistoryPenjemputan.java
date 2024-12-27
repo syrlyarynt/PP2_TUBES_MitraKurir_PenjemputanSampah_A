@@ -37,7 +37,11 @@ public class HistoryPenjemputan {
         mainPanel.add(topPanel, BorderLayout.NORTH);
 
         // Tabel data di tengah
-        String[] columnNames = {"ID Riwayat", "Waktu Selesai", "Lokasi", "Kategori Sampah", "Status Penyelesaian"};
+        String[] columnNames = {
+            "ID Riwayat", "Waktu Selesai", "Lokasi", 
+            "Kategori Sampah", "Berat (Kg)", "Harga (Rp)", 
+            "Status"
+        };
         DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
 
         JTable table = new JTable(tableModel);
@@ -50,13 +54,13 @@ public class HistoryPenjemputan {
         table.getTableHeader().setForeground(Color.WHITE);
         table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
 
-        // Renderer untuk pewarnaan baris dan pusatkan teks kolom ID Riwayat
+        // Renderer untuk pewarnaan baris dan pusatkan teks kolom
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 if (!isSelected) {
-                    String status = column == 4 ? (String) table.getValueAt(row, column) : null;
+                    String status = column == 6 ? (String) table.getValueAt(row, column) : null;
                     if ("Belum Selesai".equals(status)) {
                         c.setBackground(new Color(255, 200, 200)); // Warna merah muda untuk "Belum Selesai"
                     } else {
@@ -77,11 +81,11 @@ public class HistoryPenjemputan {
 
         // Menambahkan dummy data ke tabel
         Object[][] dummyData = {
-            {"1", "2024-12-10 14:30", "Jakarta", "Plastik", "Selesai"},
-            {"2", "2024-12-11 10:00", "Bandung", "Kertas", "Belum Selesai"},
-            {"3", "2024-12-12 12:45", "Surabaya", "Elektronik", "Selesai"},
-            {"4", "2024-12-13 08:30", "Yogyakarta", "Baterai", "Belum Selesai"},
-            {"5", "2024-12-14 16:00", "Medan", "Organik", "Selesai"}
+            {"1", "2024-12-10 14:30", "Jakarta", "Plastik", 5, 25000, "Selesai"},
+            {"2", "2024-12-11 10:00", "Bandung", "Kertas", 3, 15000, "Belum Selesai"},
+            {"3", "2024-12-12 12:45", "Surabaya", "Elektronik", 2, 50000, "Selesai"},
+            {"4", "2024-12-13 08:30", "Yogyakarta", "Baterai", 1.5, 30000, "Belum Selesai"},
+            {"5", "2024-12-14 16:00", "Medan", "Organik", 10, 5000, "Selesai"}
         };
 
         for (Object[] row : dummyData) {
