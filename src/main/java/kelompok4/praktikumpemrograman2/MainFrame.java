@@ -29,10 +29,17 @@ public class MainFrame {
         JTabbedPane tabbedPane = new JTabbedPane();
 
         // Tabs
+<<<<<<< HEAD
         tabbedPane.addTab("Jenis dan Kategori", new JenisDanKategori().getPanel());
         tabbedPane.addTab("Permintaan Penjemputan", new ContohDua().getPanel());
         tabbedPane.addTab("Menerima Prmintaan Penjemputan", new ContohTiga().getPanel());
         tabbedPane.addTab("Lokasi Dropbox", new LokasiDropbox().getPanel());
+=======
+        tabbedPane.addTab("Jenis dan Kategori", new ContohSatu().getPanel());
+        tabbedPane.addTab("Permintaan Penjemputan", new MelihatPermintaanView().getPanel());
+        tabbedPane.addTab("Menerima Permintaan Penjemputan", new MenerimaPermintaanView().getPanel());
+        tabbedPane.addTab("Lokasi Dropbox", new ContohEmpat().getPanel());
+>>>>>>> dev_Zuhdi
         tabbedPane.addTab("Total Sampah", new ContohLima().getPanel());
         tabbedPane.addTab("History Penjemputan", new ContohEnam().getPanel());
         
