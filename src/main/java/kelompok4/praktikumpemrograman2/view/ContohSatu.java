@@ -1,7 +1,10 @@
 package kelompok4.praktikumpemrograman2.view;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 public class ContohSatu{
     private JPanel panel;
