@@ -29,17 +29,18 @@ public class MainFrame {
         JTabbedPane tabbedPane = new JTabbedPane();
 
         // Tabs
-        tabbedPane.addTab("Jenis dan Kategori", new ContohSatu().getPanel());
+        tabbedPane.addTab("Jenis dan Kategori", new JenisDanKategori().getPanel());
         tabbedPane.addTab("Permintaan Penjemputan", new ContohDua().getPanel());
         tabbedPane.addTab("Menerima Prmintaan Penjemputan", new ContohTiga().getPanel());
-        tabbedPane.addTab("Lokasi Dropbox", new ContohEmpat().getPanel());
-        tabbedPane.addTab("Total Sampah", new TotalSampah().getPanel());
-        tabbedPane.addTab("History Penjemputan", new HistoryPenjemputan().getPanel());
-
+        tabbedPane.addTab("Lokasi Dropbox", new LokasiDropbox().getPanel());
+        tabbedPane.addTab("Total Sampah", new ContohLima().getPanel());
+        tabbedPane.addTab("History Penjemputan", new ContohEnam().getPanel());
+        
         // Masukin ke frame
         frame.add(tabbedPane);
 
         // Show Frame
         frame.setVisible(true);
+        frame.setLocationRelativeTo(null);
     }
 }
