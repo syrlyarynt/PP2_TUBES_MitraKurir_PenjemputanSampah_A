@@ -8,9 +8,11 @@ import java.util.List;
 
 public class JenisKategoriService {
     private final JenisKategoriMapper mapper;
+    private final SqlSession sqlSession;
 
     public JenisKategoriService(SqlSession sqlSession) {
         this.mapper = sqlSession.getMapper(JenisKategoriMapper.class);
+        this.sqlSession = sqlSession;
     }
 
     public List<JenisKategori> getAllKategori() {
@@ -23,13 +25,16 @@ public class JenisKategoriService {
 
     public void createKategori(JenisKategori kategori) {
         mapper.insertKategori(kategori);
+        sqlSession.commit();
     }
 
     public void updateKategori(JenisKategori kategori) {
         mapper.updateKategori(kategori);
+        sqlSession.commit();
     }
 
     public void deleteKategori(int id) {
         mapper.deleteKategori(id);
+        sqlSession.commit();
     }
 }

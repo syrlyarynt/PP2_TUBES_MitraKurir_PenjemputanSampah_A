@@ -1,8 +1,6 @@
 package kelompok4.praktikumpemrograman2;
 
-//Java
-import javax.swing.JFrame;
-import javax.swing.JTabbedPane;
+import javax.swing.*;
 
 import com.formdev.flatlaf.intellijthemes.FlatGrayIJTheme;
 
@@ -12,37 +10,48 @@ import kelompok4.praktikumpemrograman2.view.MenerimaPermintaanView;
 import kelompok4.praktikumpemrograman2.view.LokasiDropbox;
 import kelompok4.praktikumpemrograman2.view.TotalSampah;
 import kelompok4.praktikumpemrograman2.view.HistoryPenjemputan;
+import kelompok4.praktikumpemrograman2.controller.JenisKategoriController;
+import kelompok4.praktikumpemrograman2.services.JenisKategoriService;
+import kelompok4.praktikumpemrograman2.model.MyBatisUtil;
+import org.apache.ibatis.session.SqlSession;
 
-
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class MainFrame {
+    private static SqlSession sqlSession;
+
     public static void main(String[] args) {
-        //Intellij Theme
         FlatGrayIJTheme.setup();
 
-        // Buat Main Frame
         JFrame frame = new JFrame("Penjemputan Sampah");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1000, 800);
 
-        // Buat JTabbedPane
         JTabbedPane tabbedPane = new JTabbedPane();
 
-        // Tabs
+        try {
+            sqlSession = MyBatisUtil.getSqlSession();
+            JenisKategoriService service = new JenisKategoriService(sqlSession);
+            JenisKategoriController controller = new JenisKategoriController(service);
 
-        tabbedPane.addTab("Jenis dan Kategori", new JenisDanKategori().getPanel());
-        tabbedPane.addTab("Permintaan Penjemputan", new MelihatPermintaanView().getPanel());
-        tabbedPane.addTab("Menerima Permintaan Penjemputan", new MenerimaPermintaanView().getPanel());
-        tabbedPane.addTab("Lokasi Dropbox", new LokasiDropbox().getPanel());
-        tabbedPane.addTab("Total Sampah", new TotalSampah().getPanel());
-        tabbedPane.addTab("History Penjemputan", new HistoryPenjemputan().getPanel());
-        
-        // Masukin ke frame
+            tabbedPane.addTab("Jenis dan Kategori", new JenisDanKategori(controller).getPanel());
+            tabbedPane.addTab("Permintaan Penjemputan", new MelihatPermintaanView().getPanel());
+            tabbedPane.addTab("Menerima Permintaan Penjemputan", new MenerimaPermintaanView().getPanel());
+            tabbedPane.addTab("Lokasi Dropbox", new LokasiDropbox().getPanel());
+            tabbedPane.addTab("Total Sampah", new TotalSampah().getPanel());
+            tabbedPane.addTab("History Penjemputan", new HistoryPenjemputan().getPanel());
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error initializing database connection: " + e.getMessage());
+            return;
+        }
+
         frame.add(tabbedPane);
-
-        // Show Frame
         frame.setVisible(true);
         frame.setLocationRelativeTo(null);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (sqlSession != null) {
+                sqlSession.close();
+            }
+        }));
     }
 }
