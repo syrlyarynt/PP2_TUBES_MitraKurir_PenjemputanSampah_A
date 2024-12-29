@@ -1,108 +1,65 @@
 package kelompok4.praktikumpemrograman2.view;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import kelompok4.praktikumpemrograman2.controller.HistoryController;
+import kelompok4.praktikumpemrograman2.model.History;
 
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class HistoryPenjemputan {
+    private final HistoryController historyController;
+    private DefaultTableModel tableModel;
+    private JTable table;
+
+    public HistoryPenjemputan() {
+        this.historyController = new HistoryController();
+    }
 
     public JPanel getPanel() {
-        // Panel utama menggunakan layout BorderLayout agar lebih fleksibel
         JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setBackground(new Color(255, 250, 240)); // Warna krem muda
+        mainPanel.setBackground(new Color(255, 250, 240));
 
-        // Panel untuk judul di atas
+        // Panel untuk judul
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(new Color(255, 250, 240));
 
         JLabel titleLabel = new JLabel("History Penjemputan", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 20)); // Font bold ukuran 20
-        titleLabel.setForeground(new Color(139, 0, 0)); // Warna merah gelap
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0)); // Menambahkan jarak atas dan bawah
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+        titleLabel.setForeground(new Color(139, 0, 0));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
         topPanel.add(titleLabel, BorderLayout.CENTER);
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
 
-        // Tabel data di tengah
+        // Setup tabel
         String[] columnNames = {
-            "ID Riwayat", "Waktu Selesai", "Lokasi", 
-            "Kategori Sampah", "Berat (Kg)", "Harga (Rp)", 
-            "Status"
+                "ID Riwayat", "Waktu Selesai", "Lokasi",
+                "Kategori Sampah", "Berat (Kg)", "Harga (Rp)",
+                "Status"
         };
-        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
-
-        JTable table = new JTable(tableModel);
-        table.setBackground(new Color(255, 239, 213)); // Warna latar tabel oranye muda
-        table.setForeground(Color.BLACK); // Warna teks hitam
-        table.setFont(new Font("SansSerif", Font.PLAIN, 14));
-
-        // Header tabel dengan warna khusus
-        table.getTableHeader().setBackground(new Color(255, 160, 122)); // Warna salmon
-        table.getTableHeader().setForeground(Color.WHITE);
-        table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
-
-        // Renderer untuk pewarnaan baris dan pusatkan teks kolom
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                if (!isSelected) {
-                    String status = column == 6 ? (String) table.getValueAt(row, column) : null;
-                    if ("Belum Selesai".equals(status)) {
-                        c.setBackground(new Color(255, 200, 200)); // Warna merah muda untuk "Belum Selesai"
-                    } else {
-                        c.setBackground(row % 2 == 0 ? new Color(255, 250, 240) : new Color(255, 239, 213)); // Alternating row colors
-                    }
-                }
-                setHorizontalAlignment(SwingConstants.CENTER); // Memusatkan teks
-                return c;
-            }
-        };
-
-        for (int i = 0; i < table.getColumnCount(); i++) {
-            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
-        }
+        tableModel = new DefaultTableModel(columnNames, 0);
+        table = new JTable(tableModel);
+        setupTableProperties();
 
         JScrollPane scrollPane = new JScrollPane(table);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Menambahkan dummy data ke tabel
-        Object[][] dummyData = {
-            {"1", "2024-12-10 14:30", "Jakarta", "Plastik", 5, 25000, "Selesai"},
-            {"2", "2024-12-11 10:00", "Bandung", "Kertas", 3, 15000, "Belum Selesai"},
-            {"3", "2024-12-12 12:45", "Surabaya", "Elektronik", 2, 50000, "Selesai"},
-            {"4", "2024-12-13 08:30", "Yogyakarta", "Baterai", 1.5, 30000, "Belum Selesai"},
-            {"5", "2024-12-14 16:00", "Medan", "Organik", 10, 5000, "Selesai"}
-        };
-
-        for (Object[] row : dummyData) {
-            tableModel.addRow(row);
-        }
-
-        // Panel bawah untuk label total penjemputan
+        // Panel bawah untuk total penjemputan
         JPanel bottomPanel = new JPanel(new GridBagLayout());
         bottomPanel.setBackground(new Color(255, 250, 240));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10); // Margin antar komponen
+        updateTableData();
 
-        // Label total penjemputan
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+
         JLabel totalLabel = new JLabel("Total Penjemputan: " + tableModel.getRowCount());
-        totalLabel.setFont(new Font("SansSerif", Font.BOLD, 14)); // Font bold ukuran 14
-        totalLabel.setForeground(new Color(139, 0, 0)); // Warna merah gelap
+        totalLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        totalLabel.setForeground(new Color(139, 0, 0));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.EAST;
@@ -111,5 +68,75 @@ public class HistoryPenjemputan {
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         return mainPanel;
+    }
+
+    private void setupTableProperties() {
+        table.setBackground(new Color(255, 239, 213));
+        table.setForeground(Color.BLACK);
+        table.setFont(new Font("SansSerif", Font.PLAIN, 14));
+
+        // Header styling
+        table.getTableHeader().setBackground(new Color(255, 160, 122));
+        table.getTableHeader().setForeground(Color.WHITE);
+        table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        // Cell renderer for alternating colors and center alignment
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    String status = column == 6 ? (String) table.getValueAt(row, column) : null;
+                    if ("Belum Selesai".equals(status)) {
+                        c.setBackground(new Color(255, 200, 200));
+                    } else {
+                        c.setBackground(row % 2 == 0 ? new Color(255, 250, 240) : new Color(255, 239, 213));
+                    }
+                }
+                setHorizontalAlignment(SwingConstants.CENTER);
+                return c;
+            }
+        };
+
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+    }
+
+    private void updateTableData() {
+        System.out.println("\n=== Starting Table Update ===");
+        try {
+            tableModel.setRowCount(0);
+            System.out.println("Table cleared");
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            List<History> histories = historyController.getAllHistory();
+
+            System.out.println("Processing " + histories.size() + " records for display");
+
+            for (History history : histories) {
+                System.out.println("Processing record ID: " + history.getIdRiwayat());
+                Object[] rowData = new Object[]{
+                        history.getIdRiwayat(),
+                        history.getWaktuSelesai().format(formatter),
+                        history.getLokasi(),
+                        history.getKategoriSampah(),
+                        history.getBeratSampah(),
+                        history.getHarga(),
+                        history.getStatusPenyelesaian()
+                };
+                tableModel.addRow(rowData);
+                System.out.println("Added row to table: ID=" + history.getIdRiwayat() +
+                        ", Status=" + history.getStatusPenyelesaian());
+            }
+
+            System.out.println("Final table row count: " + tableModel.getRowCount());
+
+        } catch (Exception e) {
+            System.out.println("ERROR updating table: " + e.getMessage());
+            e.printStackTrace();
+        }
+        System.out.println("=== Table Update Complete ===\n");
     }
 }
