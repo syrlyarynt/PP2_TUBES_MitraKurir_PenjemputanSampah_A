@@ -18,7 +18,8 @@ dependencies {
     implementation 'com.miglayout:miglayout:3.7.4'
 // https://mvnrepository.com/artifact/org.mybatis/mybatis
     implementation 'org.mybatis:mybatis:3.5.17'
-
+    implementation 'com.formdev:flatlaf:3.5.4'
+    implementation 'com.formdev:flatlaf-intellij-themes:3.5.4'
 
 }
 
