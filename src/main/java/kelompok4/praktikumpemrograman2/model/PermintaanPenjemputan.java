@@ -45,4 +45,11 @@ public class PermintaanPenjemputan {
 
     public LokasiDropbox getLokasiDropbox() { return lokasiDropbox; }
     public void setLokasiDropbox(LokasiDropbox lokasiDropbox) { this.lokasiDropbox = lokasiDropbox; }
+    @Override
+    public String toString() {
+        return "PermintaanPenjemputan [idPermintaan=" + idPermintaan + ", namaPelanggan=" + namaPelanggan + ", alamat="
+                + alamat + ", kategoriSampah=" + kategoriSampah + ", berat=" + berat + ", harga=" + harga
+                + ", waktuPermintaan=" + waktuPermintaan + ", status=" + status + ", dropboxId=" + dropboxId + "]";
+    }
+    
 }

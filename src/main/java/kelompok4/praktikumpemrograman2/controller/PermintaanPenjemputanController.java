@@ -2,17 +2,15 @@ package kelompok4.praktikumpemrograman2.controller;
 
 import kelompok4.praktikumpemrograman2.model.PermintaanPenjemputan;
 import kelompok4.praktikumpemrograman2.services.PermintaanPenjemputanService;
-import org.apache.ibatis.session.SqlSession;
-import kelompok4.praktikumpemrograman2.model.MyBatisUtil;
 
 import java.util.List;
 
 public class PermintaanPenjemputanController {
     private final PermintaanPenjemputanService service;
 
-    public PermintaanPenjemputanController() {
-        SqlSession sqlSession = MyBatisUtil.getSqlSession();
-        this.service = new PermintaanPenjemputanService(sqlSession);
+    public PermintaanPenjemputanController(PermintaanPenjemputanService service) {
+        // SqlSession sqlSession = MyBatisUtil.getSqlSession();
+        this.service = service;
     }
 
     public List<PermintaanPenjemputan> getAllPermintaan() {

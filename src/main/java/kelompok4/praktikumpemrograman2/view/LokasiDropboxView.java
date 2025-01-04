@@ -19,10 +19,10 @@ import kelompok4.praktikumpemrograman2.model.LokasiDropboxMapper;
 import kelompok4.praktikumpemrograman2.model.MyBatisUtil;
 import net.miginfocom.swing.MigLayout;
 
-public class LokasiDropbox {
+public class LokasiDropboxView {
     private JPanel panel;
 
-    public LokasiDropbox() {
+    public LokasiDropboxView() {
         
         // Panel utama menggunakan MigLayout
         panel = new JPanel(new MigLayout("wrap 2", "[grow, fill][grow, fill]", "[]10[]10[]10[]10[]10[]10[grow]"));

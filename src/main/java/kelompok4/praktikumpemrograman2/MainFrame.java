@@ -7,7 +7,7 @@ import com.formdev.flatlaf.intellijthemes.FlatGrayIJTheme;
 import kelompok4.praktikumpemrograman2.view.JenisDanKategori;
 import kelompok4.praktikumpemrograman2.view.PermintaanPenjemputanView;
 import kelompok4.praktikumpemrograman2.view.MenerimaPermintaanView;
-import kelompok4.praktikumpemrograman2.view.LokasiDropbox;
+import kelompok4.praktikumpemrograman2.view.LokasiDropboxView;
 import kelompok4.praktikumpemrograman2.view.TotalSampah;
 import kelompok4.praktikumpemrograman2.view.HistoryPenjemputan;
 import kelompok4.praktikumpemrograman2.controller.JenisKategoriController;
@@ -35,7 +35,7 @@ public class MainFrame {
             tabbedPane.addTab("Jenis dan Kategori", new JenisDanKategori(controller).getPanel());
             tabbedPane.addTab("Permintaan Penjemputan", new PermintaanPenjemputanView().getPanel());
             tabbedPane.addTab("Menerima Permintaan Penjemputan", new MenerimaPermintaanView().getPanel());
-            tabbedPane.addTab("Lokasi Dropbox", new LokasiDropbox().getPanel());
+            tabbedPane.addTab("Lokasi Dropbox", new LokasiDropboxView().getPanel());
             tabbedPane.addTab("Total Sampah", new TotalSampah().getPanel());
             tabbedPane.addTab("History Penjemputan", new HistoryPenjemputan().getPanel());
         } catch (Exception e) {
