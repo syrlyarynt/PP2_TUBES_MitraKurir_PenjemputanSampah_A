@@ -34,4 +34,8 @@ public class PermintaanPenjemputanController {
     public void deletePermintaan(int id) {
         service.deletePermintaan(id);
     }
+
 }
+
+
+

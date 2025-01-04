@@ -32,4 +32,7 @@ public class PermintaanPenjemputanService {
     public void deletePermintaan(int id) {
         mapper.deletePermintaan(id);
     }
+
 }
+
+

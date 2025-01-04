@@ -19,4 +19,7 @@ public interface JenisKategoriMapper {
 
     @Delete("DELETE FROM jenis_kategori WHERE id = #{id}")
     void deleteKategori(@Param("id") int id);
+
 }
+
+

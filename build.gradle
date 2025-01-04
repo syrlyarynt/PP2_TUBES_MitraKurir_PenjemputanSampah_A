@@ -15,7 +15,7 @@ dependencies {
     // https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
     implementation 'com.mysql:mysql-connector-j:9.1.0'
 // https://mvnrepository.com/artifact/com.miglayout/miglayout
-    implementation 'com.miglayout:miglayout:3.7.4'
+    implementation 'com.miglayout:miglayout-swing:11.4.2'
 // https://mvnrepository.com/artifact/org.mybatis/mybatis
     implementation 'org.mybatis:mybatis:3.5.17'
     implementation 'com.formdev:flatlaf:3.5.4'

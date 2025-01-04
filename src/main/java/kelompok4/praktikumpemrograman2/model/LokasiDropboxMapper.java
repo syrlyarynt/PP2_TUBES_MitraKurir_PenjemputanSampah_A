@@ -5,8 +5,10 @@ import org.apache.ibatis.annotations.*;
 import java.util.List;
 
 public interface LokasiDropboxMapper {
+
         @Select("SELECT id, nama_dropbox, alamat, jarak FROM lokasi_dropbox")
         List<LokasiDropbox> getAllDropbox();
+
 
     @Select("SELECT * FROM lokasi_dropbox WHERE id = #{id}")
     LokasiDropbox getDropboxById(@Param("id") int id);

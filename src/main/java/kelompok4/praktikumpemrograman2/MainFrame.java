@@ -5,7 +5,7 @@ import javax.swing.*;
 import com.formdev.flatlaf.intellijthemes.FlatGrayIJTheme;
 
 import kelompok4.praktikumpemrograman2.view.JenisDanKategori;
-import kelompok4.praktikumpemrograman2.view.MelihatPermintaanView;
+import kelompok4.praktikumpemrograman2.view.PermintaanPenjemputanView;
 import kelompok4.praktikumpemrograman2.view.MenerimaPermintaanView;
 import kelompok4.praktikumpemrograman2.view.LokasiDropbox;
 import kelompok4.praktikumpemrograman2.view.TotalSampah;
@@ -33,7 +33,7 @@ public class MainFrame {
             JenisKategoriController controller = new JenisKategoriController(service);
 
             tabbedPane.addTab("Jenis dan Kategori", new JenisDanKategori(controller).getPanel());
-            tabbedPane.addTab("Permintaan Penjemputan", new MelihatPermintaanView().getPanel());
+            tabbedPane.addTab("Permintaan Penjemputan", new PermintaanPenjemputanView().getPanel());
             tabbedPane.addTab("Menerima Permintaan Penjemputan", new MenerimaPermintaanView().getPanel());
             tabbedPane.addTab("Lokasi Dropbox", new LokasiDropbox().getPanel());
             tabbedPane.addTab("Total Sampah", new TotalSampah().getPanel());

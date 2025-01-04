@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 ini merupakan model
+=======
+Setting up branch
+>>>>>>> e7a30466298d4cdfcd9f16b81b590274aecd1a25
