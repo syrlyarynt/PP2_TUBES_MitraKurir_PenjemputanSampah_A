@@ -1,62 +1,53 @@
 package kelompok4.praktikumpemrograman2.view;
 
+import kelompok4.praktikumpemrograman2.controller.PermintaanPenjemputanController;
+import kelompok4.praktikumpemrograman2.model.JenisKategori;
+import kelompok4.praktikumpemrograman2.model.PermintaanPenjemputan;
+import kelompok4.praktikumpemrograman2.model.LokasiDropbox;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
+import java.math.BigDecimal;
+import java.util.List;
 
 public class MelihatPermintaanView extends JFrame {
-    private JPanel Panel;
+    private JPanel panel;
     private JTable pickupTable;
     private DefaultTableModel tableModel;
     private JComboBox<String> filterComboBox;
+    private PermintaanPenjemputanController controller;
 
     public MelihatPermintaanView() {
-        setTitle("Daftar Pickup");
+        setTitle("Daftar Permintaan Penjemputan");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // Panel utama dengan BorderLayout
-        Panel = new JPanel(new BorderLayout());
-        Panel.setBackground(new Color(255, 250, 240)); // Background warna cream muda
+        controller = new PermintaanPenjemputanController();
 
-        // Header Panel
+        panel = new JPanel(new BorderLayout());
+        panel.setBackground(new Color(255, 250, 240));
+
         JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(new Color(255, 250, 240)); // Background cream muda
+        headerPanel.setBackground(new Color(255, 250, 240));
 
-        // Membuat panel pembungkus untuk memberi jarak pada label
-        JPanel titleWrapperPanel = new JPanel();
-        titleWrapperPanel.setBackground(new Color(255, 250, 240)); // Background sama dengan header
-        titleWrapperPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0)); // Memberikan margin atas 10px
-
-        // Label judul
-        JLabel lblTitle = new JLabel("Daftar Pickup", SwingConstants.CENTER);
-        lblTitle.setFont(new Font("SansSerif", Font.BOLD, 14));
+        JLabel lblTitle = new JLabel("Daftar Permintaan Penjemputan", SwingConstants.CENTER);
+        lblTitle.setFont(new Font("SansSerif", Font.BOLD, 18));
         lblTitle.setForeground(new Color(139, 0, 0));
+        headerPanel.add(lblTitle, BorderLayout.CENTER);
 
-        // Menambahkan label ke dalam wrapper
-        titleWrapperPanel.add(lblTitle);
+        panel.add(headerPanel, BorderLayout.NORTH);
 
-        // Menambahkan titleWrapperPanel ke headerPanel
-        headerPanel.add(titleWrapperPanel, BorderLayout.CENTER);
-
-        // Panel Filter
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel lblFilter = new JLabel("Filter by:");
-        lblFilter.setFont(new Font("SansSerif", Font.BOLD, 10));
-        lblFilter.setForeground(new Color(139, 0, 0));
-        filterComboBox = new JComboBox<>(new String[]{"Terdekat", "Jenis Sampah"});
+        filterComboBox = new JComboBox<>(new String[]{"Semua", "Hari Ini", "Minggu Ini", "Bulan Ini"});
         filterComboBox.setBackground(new Color(255, 160, 122));
         filterPanel.add(lblFilter);
         filterPanel.add(filterComboBox);
-        filterPanel.setBackground(new Color(255, 250, 240)); // Background cream muda
+        filterPanel.setBackground(new Color(255, 250, 240));
+        panel.add(filterPanel, BorderLayout.SOUTH);
 
-        // Panel Kontainer untuk Filter dan Tabel
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.setBackground(new Color(255, 250, 240));
-
-        // Tabel Pickup
-        String[] columnNames = {"Nama", "Alamat", "Jenis Sampah", "Harga"};
+        String[] columnNames = {"ID", "Nama", "Alamat", "Jenis Sampah", "Berat (kg)", "Harga", "Status", "Lokasi Dropbox"};
         tableModel = new DefaultTableModel(columnNames, 0);
         pickupTable = new JTable(tableModel) {
             @Override
@@ -75,74 +66,228 @@ public class MelihatPermintaanView extends JFrame {
             }
         };
 
-        // Mengatur renderer untuk setiap kolom dengan alignment dan font
-        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
-        renderer.setHorizontalAlignment(SwingConstants.CENTER); // Align ke tengah
-        renderer.setFont(new Font("SansSerif", Font.PLAIN, 14)); // Set font
-
-        // Mengatur renderer untuk setiap kolom
-        pickupTable.getColumnModel().getColumn(0).setCellRenderer(renderer); // Kolom "Nama"
-        pickupTable.getColumnModel().getColumn(1).setCellRenderer(renderer); // Kolom "Alamat"
-        pickupTable.getColumnModel().getColumn(2).setCellRenderer(renderer); // Kolom "Jenis Sampah"
-        pickupTable.getColumnModel().getColumn(3).setCellRenderer(renderer); // Kolom "Harga"
-
-        // Mengubah latar belakang tabel menjadi oranye muda
-        pickupTable.setBackground(new Color(255, 239, 213)); // Latar belakang tabel oranye muda
-
-        pickupTable.getTableHeader().setBackground(new Color(255, 160, 122)); // Background header tabel oranye muda
-        pickupTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 10));
-        pickupTable.getTableHeader().setForeground(Color.WHITE);
         JScrollPane tableScrollPane = new JScrollPane(pickupTable);
-        tableScrollPane.setPreferredSize(new Dimension(400, 150)); // Ukuran tabel lebih kecil
+        panel.add(tableScrollPane, BorderLayout.CENTER);
 
-        // Panel untuk tombol Pickup
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // Posisikan tombol di tengah
         JButton pickupButton = new JButton("Pickup");
+        JButton addButton = new JButton("Tambah Permintaan");
+
         pickupButton.setBackground(new Color(255, 160, 122));
         pickupButton.setForeground(Color.WHITE);
-        buttonPanel.add(pickupButton); // Tambahkan tombol ke panel
+        pickupButton.addActionListener(e -> handlePickup());
 
-        // Tambahkan filterPanel ke atas centerPanel
-        centerPanel.add(filterPanel, BorderLayout.NORTH);
-        centerPanel.add(tableScrollPane, BorderLayout.CENTER);
-        centerPanel.add(buttonPanel, BorderLayout.SOUTH); // Menambahkan panel tombol ke bagian bawah tabel
+        addButton.setBackground(new Color(60, 179, 113));
+        addButton.setForeground(Color.WHITE);
+        addButton.addActionListener(e -> showAddRequestForm());
 
-        // Tambahkan komponen ke panel utama
-        Panel.add(headerPanel, BorderLayout.NORTH);
-        Panel.add(centerPanel, BorderLayout.CENTER);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.add(addButton);
+        buttonPanel.add(pickupButton);
+        panel.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Tambahkan panel utama ke frame
-        setContentPane(Panel);
+        loadPermintaanData();
 
-        // Sesuaikan ukuran frame
+        setContentPane(panel);
         pack();
-        setLocationRelativeTo(null); // Posisikan frame di tengah layar
-
-        // Data dummy untuk ditampilkan di tabel
-        String[][] dataDummy = {
-            {"John Doe", "Jl. Merdeka No. 1", "Organik", "Rp 50.000"},
-            {"Jane Smith", "Jl. Pahlawan No. 2", "Anorganik", "Rp 30.000"},
-            {"Andi Wijaya", "Jl. Raya No. 3", "Bahan Keras", "Rp 75.000"},
-            {"Dewi Lestari", "Jl. Kebangsaan No. 4", "Organik", "Rp 45.000"},
-            {"Budi Santoso", "Jl. Taman No. 5", "Elektronik", "Rp 100.000"}
-        };
-        setPickupData(dataDummy); // Menampilkan data dummy di tabel
-    }
-
-    // Method untuk mengatur data tabel
-    public void setPickupData(String[][] data) {
-        tableModel.setRowCount(0); // Hapus data lama
-        for (String[] row : data) {
-            tableModel.addRow(row);
-        }
-    }
-
-    // Method untuk mendapatkan pilihan filter
-    public String getSelectedFilter() {
-        return filterComboBox.getSelectedItem().toString();
+        setLocationRelativeTo(null);
     }
 
     public JPanel getPanel() {
-        return Panel;
+        return panel;
     }
+
+    private void loadPermintaanData() {
+        tableModel.setRowCount(0);
+        List<PermintaanPenjemputan> permintaanList = controller.getAllPermintaan();
+        for (PermintaanPenjemputan permintaan : permintaanList) {
+            LokasiDropbox dropbox = permintaan.getLokasiDropbox();
+            String dropboxName = (dropbox != null) ? dropbox.getNamaDropbox() : "-";
+
+            tableModel.addRow(new Object[]{
+                    permintaan.getIdPermintaan(),
+                    permintaan.getNamaPelanggan(),
+                    permintaan.getAlamat(),
+                    permintaan.getKategoriSampah(),
+                    permintaan.getBerat(),
+                    permintaan.getHarga(),
+                    permintaan.getStatus(),
+                    dropboxName
+            });
+        }
+    }
+
+    private void handlePickup() {
+        int selectedRow = pickupTable.getSelectedRow();
+        if (selectedRow >= 0) {
+            int idPermintaan = (int) tableModel.getValueAt(selectedRow, 0);
+            PermintaanPenjemputan permintaan = controller.getPermintaanById(idPermintaan);
+            if (permintaan != null) {
+                permintaan.setStatus("Dalam Proses");
+                controller.updatePermintaan(permintaan);
+                loadPermintaanData();
+                JOptionPane.showMessageDialog(this, "Permintaan pickup diproses.");
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Pilih permintaan untuk pickup.");
+        }
+    }
+
+    private void showAddRequestForm() {
+        JTextField namaField = new JTextField(20);
+        JTextField alamatField = new JTextField(20);
+        JTextField beratField = new JTextField(20);
+
+        // Get kategori list and create custom ComboBox
+        List<JenisKategori> kategoriList = controller.getAllKategoriSampah();
+        DefaultComboBoxModel<JenisKategori> comboModel = new DefaultComboBoxModel<>(
+                kategoriList.toArray(new JenisKategori[0])
+        );
+        JComboBox<JenisKategori> kategoriComboBox = new JComboBox<>(comboModel);
+
+        // Get dropbox list
+        List<LokasiDropbox> dropboxList = controller.getAllDropbox();
+        DefaultComboBoxModel<LokasiDropbox> dropboxModel = new DefaultComboBoxModel<>(
+                dropboxList.toArray(new LokasiDropbox[0])
+        );
+        JComboBox<LokasiDropbox> dropboxComboBox = new JComboBox<>(dropboxModel);
+
+        // Custom renderer for dropbox to show name and available capacity
+        dropboxComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value,
+                                                          int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof LokasiDropbox) {
+                    LokasiDropbox dropbox = (LokasiDropbox) value;
+                    BigDecimal availableCapacity = dropbox.getKapasitasMax()
+                            .subtract(dropbox.getKapasitasTerisi());
+                    value = String.format("%s (Tersedia: %s kg)",
+                            dropbox.getNamaDropbox(),
+                            availableCapacity.toString());
+                }
+                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            }
+        });
+
+        // Update panel to include dropbox selection
+        JPanel panel = new JPanel(new GridLayout(5, 2, 5, 5));
+        panel.add(new JLabel("Nama:"));
+        panel.add(namaField);
+        panel.add(new JLabel("Alamat:"));
+        panel.add(alamatField);
+        panel.add(new JLabel("Jenis Sampah:"));
+        panel.add(kategoriComboBox);
+        panel.add(new JLabel("Berat (kg):"));
+        panel.add(beratField);
+        panel.add(new JLabel("Lokasi Dropbox:"));
+        panel.add(dropboxComboBox);
+
+        int result = JOptionPane.showConfirmDialog(null, panel,
+                "Tambah Permintaan", JOptionPane.OK_CANCEL_OPTION);
+
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                // Validate inputs
+                String nama = namaField.getText().trim();
+                String alamat = alamatField.getText().trim();
+                String beratStr = beratField.getText().trim();
+                System.out.println("=== Input Values ===");
+                System.out.println("Nama: " + nama);
+                System.out.println("Alamat: " + alamat);
+                System.out.println("Berat: " + beratStr);
+                if (nama.isEmpty() || alamat.isEmpty() || beratStr.isEmpty()) {
+                    JOptionPane.showMessageDialog(this,
+                            "Semua field harus diisi!",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Parse berat and validate
+                double berat;
+                try {
+                    berat = Double.parseDouble(beratStr);
+                    if (berat <= 0) {
+                        throw new NumberFormatException();
+                    }
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(this,
+                            "Berat harus berupa angka positif!",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Get selected kategori
+                JenisKategori selectedKategori = (JenisKategori) kategoriComboBox.getSelectedItem();
+                if (selectedKategori == null) {
+                    JOptionPane.showMessageDialog(this,
+                            "Silakan pilih jenis sampah!",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Get and validate selected dropbox
+                LokasiDropbox selectedDropbox = (LokasiDropbox) dropboxComboBox.getSelectedItem();
+                if (selectedDropbox == null) {
+                    JOptionPane.showMessageDialog(this,
+                            "Silakan pilih lokasi dropbox!",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Check dropbox capacity
+                BigDecimal newBerat = BigDecimal.valueOf(berat);
+                BigDecimal availableCapacity = selectedDropbox.getKapasitasMax()
+                        .subtract(selectedDropbox.getKapasitasTerisi());
+
+                if (newBerat.compareTo(availableCapacity) > 0) {
+                    JOptionPane.showMessageDialog(this,
+                            "Kapasitas dropbox tidak mencukupi! Kapasitas tersedia: "
+                                    + availableCapacity + " kg",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Create new permintaan
+                PermintaanPenjemputan permintaan = new PermintaanPenjemputan(
+                        nama,
+                        alamat,
+                        selectedKategori.getId(),
+                        berat
+                );
+                permintaan.setDropboxId(selectedDropbox.getId());
+
+                // Update dropbox capacity
+                selectedDropbox.setKapasitasTerisi(
+                        selectedDropbox.getKapasitasTerisi().add(newBerat)
+                );
+                controller.getDropboxController().updateDropbox(selectedDropbox);
+
+                // Save permintaan
+                controller.createPermintaan(
+                        permintaan.getNamaPelanggan(),
+                        permintaan.getAlamat(),
+                        permintaan.getKategoriSampahId(),
+                        permintaan.getBerat().doubleValue(),
+                        permintaan.getDropboxId(),
+                        permintaan.getHarga()
+                );
+
+                loadPermintaanData();
+                JOptionPane.showMessageDialog(this, "Data berhasil ditambahkan.");
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this,
+                        "Terjadi kesalahan: " + e.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+
+
 }

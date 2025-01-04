@@ -4,41 +4,38 @@ import org.apache.ibatis.annotations.*;
 import java.util.List;
 
 public interface HistoryMapper {
-    @Select("SELECT * FROM history")
-    @Results({
+    @Select("SELECT h.*, pa.* FROM history h " +
+            "LEFT JOIN pickup_assignments pa ON h.pickup_assignment_id = pa.id")
+    @Results(id = "historyResultMap", value = {
             @Result(property = "idRiwayat", column = "idRiwayat"),
             @Result(property = "waktuSelesai", column = "waktuSelesai"),
             @Result(property = "lokasi", column = "lokasi"),
             @Result(property = "kategoriSampah", column = "kategoriSampah"),
             @Result(property = "beratSampah", column = "beratSampah"),
             @Result(property = "harga", column = "harga"),
-            @Result(property = "statusPenyelesaian", column = "statusPenyelesaian")
+            @Result(property = "statusPenyelesaian", column = "statusPenyelesaian"),
+            @Result(property = "pickupAssignmentId", column = "pickup_assignment_id")
     })
     List<History> getAllHistory();
 
-    @Select("SELECT * FROM permintaanpenjemputan WHERE IDpermintaan = #{id}")
-    @Results({
-            @Result(property = "idRiwayat", column = "IDpermintaan"),
-            @Result(property = "waktuSelesai", column = "waktuPermintaan"),
-            @Result(property = "lokasi", column = "alamat"),
-            @Result(property = "kategoriSampah", column = "kategoriSampah"),
-            @Result(property = "beratSampah", column = "berat"),
-            @Result(property = "harga", column = "harga"),
-            @Result(property = "statusPenyelesaian", column = "status")
-    })
+    @Select("SELECT * FROM history WHERE idRiwayat = #{id}")
+    @ResultMap("historyResultMap")
     History getHistoryById(@Param("id") int id);
 
-    @Insert("INSERT INTO permintaanpenjemputan (waktuPermintaan, alamat, kategoriSampah, berat, harga, status) " +
-            "VALUES (#{waktuSelesai}, #{lokasi}, #{kategoriSampah}, #{beratSampah}, #{harga}, #{statusPenyelesaian})")
-    @Options(useGeneratedKeys = true, keyProperty = "idRiwayat", keyColumn = "IDpermintaan")
+    @Insert("INSERT INTO history (pickup_assignment_id, waktuSelesai, lokasi, " +
+            "kategoriSampah, beratSampah, harga, statusPenyelesaian) " +
+            "VALUES (#{pickupAssignmentId}, #{waktuSelesai}, #{lokasi}, " +
+            "#{kategoriSampah}, #{beratSampah}, #{harga}, #{statusPenyelesaian})")
+    @Options(useGeneratedKeys = true, keyProperty = "idRiwayat")
     void insertHistory(History history);
 
-    @Update("UPDATE permintaanpenjemputan SET waktuPermintaan = #{waktuSelesai}, alamat = #{lokasi}, " +
-            "kategoriSampah = #{kategoriSampah}, berat = #{beratSampah}, " +
-            "harga = #{harga}, status = #{statusPenyelesaian} " +
-            "WHERE IDpermintaan = #{idRiwayat}")
+    @Update("UPDATE history SET pickup_assignment_id = #{pickupAssignmentId}, " +
+            "waktuSelesai = #{waktuSelesai}, lokasi = #{lokasi}, " +
+            "kategoriSampah = #{kategoriSampah}, beratSampah = #{beratSampah}, " +
+            "harga = #{harga}, statusPenyelesaian = #{statusPenyelesaian} " +
+            "WHERE idRiwayat = #{idRiwayat}")
     void updateHistory(History history);
 
-    @Delete("DELETE FROM permintaanpenjemputan WHERE IDpermintaan = #{id}")
+    @Delete("DELETE FROM history WHERE idRiwayat = #{id}")
     void deleteHistory(@Param("id") int id);
 }

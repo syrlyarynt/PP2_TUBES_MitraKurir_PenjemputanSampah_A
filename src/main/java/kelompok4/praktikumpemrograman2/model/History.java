@@ -11,6 +11,8 @@ public class History {
     private BigDecimal beratSampah;
     private BigDecimal harga;
     private String statusPenyelesaian;
+    private Integer pickupAssignmentId; // New field
+    private PickupAssignment pickupAssignment; // New relationship
 
     // Getters and Setters
     public int getIdRiwayat() { return idRiwayat; }
@@ -33,4 +35,20 @@ public class History {
 
     public String getStatusPenyelesaian() { return statusPenyelesaian; }
     public void setStatusPenyelesaian(String statusPenyelesaian) { this.statusPenyelesaian = statusPenyelesaian; }
+
+    public Integer getPickupAssignmentId() {
+        return pickupAssignmentId;
+    }
+
+    public void setPickupAssignmentId(Integer pickupAssignmentId) {
+        this.pickupAssignmentId = pickupAssignmentId;
+    }
+
+    public PickupAssignment getPickupAssignment() {
+        return pickupAssignment;
+    }
+
+    public void setPickupAssignment(PickupAssignment pickupAssignment) {
+        this.pickupAssignment = pickupAssignment;
+    }
 }
