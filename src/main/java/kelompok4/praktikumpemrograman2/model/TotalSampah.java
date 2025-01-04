@@ -11,7 +11,54 @@ public class TotalSampah {
     private BigDecimal totalHarga;
     private BigDecimal beratKg;
     private Integer permintaanId;
-    private String namaJenis; // Tambahkan getter dan setter untuk ini
+    private String namaJenis;
+    private String namaPelanggan;
+    private String alamat;
+    private String kategoriSampah;
+    private String waktuPermintaan;
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getWaktuPermintaan() {
+        return waktuPermintaan;
+    }
+
+    public void setWaktuPermintaan(String waktuPermintaan) {
+        this.waktuPermintaan = waktuPermintaan;
+    }
+
+    public String getKategoriSampah() {
+        return kategoriSampah;
+    }
+
+    public void setKategoriSampah(String kategoriSampah) {
+        this.kategoriSampah = kategoriSampah;
+    }
+
+    public String getAlamat() {
+        return alamat;
+    }
+
+    public void setAlamat(String alamat) {
+        this.alamat = alamat;
+    }
+
+    // Getter
+    public String getNamaPelanggan() {
+        return namaPelanggan;
+    }
+
+    // Setter
+    public void setNamaPelanggan(String namaPelanggan) {
+        this.namaPelanggan = namaPelanggan;
+    }
 
     public String getNamaJenis() { return namaJenis; }
     public void setNamaJenis(String namaJenis) { this.namaJenis = namaJenis; }
