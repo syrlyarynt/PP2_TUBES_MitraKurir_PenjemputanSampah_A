@@ -14,4 +14,10 @@ public class JenisKategori {
 
     public String getIcon() { return icon; }
     public void setIcon(String icon) { this.icon = icon; }
+
+    // Add toString method to display the category name in ComboBox
+    @Override
+    public String toString() {
+        return nama;
+    }
 }
