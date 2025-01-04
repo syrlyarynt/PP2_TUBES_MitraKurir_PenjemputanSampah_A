@@ -104,6 +104,19 @@ public class LokasiDropboxView {
         JButton btnEdit = new JButton("Edit Dropbox");
         JButton btnDelete = new JButton("Delete Dropbox");
 
+        //style btns
+        btnAdd.setBackground(new Color(255, 160, 122));
+        btnAdd.setForeground(Color.WHITE);
+        btnAdd.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        btnEdit.setBackground(new Color(255, 160, 122));
+        btnEdit.setForeground(Color.WHITE);
+        btnEdit.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        btnDelete.setBackground(new Color(255, 160, 122));
+        btnDelete.setForeground(Color.WHITE);
+        btnDelete.setFont(new Font("SansSerif", Font.BOLD, 14));
+
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnEdit);
         buttonPanel.add(btnDelete);

@@ -36,16 +36,34 @@ public class JenisDanKategori {
         list.setBackground(new Color(255, 239, 213)); 
     
         JScrollPane scrollPane = new JScrollPane(list);
-        scrollPane.setPreferredSize(new Dimension(1000, 800));
+        scrollPane.setPreferredSize(new Dimension(1000, 1000));
         mainPanel.add(scrollPane, "span, grow, wrap");
     
         // Button Panel - Centering buttons
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         buttonPanel.setBackground(new Color(255, 250, 240));
         JButton addButton = new JButton("Add");
         JButton deleteButton = new JButton("Delete");
         JButton updateButton = new JButton("Update");
         JButton refreshButton = new JButton("Refresh");
+
+        //style masing buttns
+        addButton.setBackground(new Color(255, 160, 122));
+        addButton.setForeground(Color.WHITE);
+        addButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        deleteButton.setBackground(new Color(255, 160, 122));
+        deleteButton.setForeground(Color.WHITE);
+        deleteButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        updateButton.setBackground(new Color(255, 160, 122));
+        updateButton.setForeground(Color.WHITE);
+        updateButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        refreshButton.setBackground(new Color(255, 160, 122));
+        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+
     
         addButton.addActionListener(e -> onAdd(listModel));
         deleteButton.addActionListener(e -> onDelete(list.getSelectedValue(), listModel));
