@@ -17,42 +17,68 @@ public class JenisDanKategori {
     private final String ICON_FOLDER = "src/main/resources/icons/";
 
     public JenisDanKategori(JenisKategoriController controller) {
+        UIManager.put( "Button.arc", 999 );
+
         this.controller = controller;
         panel = new JPanel(new BorderLayout());
         JPanel mainPanel = new JPanel(new MigLayout("", "[grow]", "[][][grow][]"));
-
+    
         JLabel titleLabel = new JLabel("Jenis dan Kategori Sampah");
-        titleLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+        titleLabel.setForeground(new Color(139, 0, 0)); 
         mainPanel.add(titleLabel, "span, align center, wrap");
-
+        mainPanel.setBackground(new Color(255, 250, 240));
+    
         DefaultListModel<KategoriItem> listModel = new DefaultListModel<>();
         loadKategoriData(listModel);
         JList<KategoriItem> list = new JList<>(listModel);
         list.setCellRenderer(new CustomCellRenderer());
-
+        list.setBackground(new Color(255, 239, 213)); 
+    
         JScrollPane scrollPane = new JScrollPane(list);
-        scrollPane.setPreferredSize(new Dimension(1000, 500));
+        scrollPane.setPreferredSize(new Dimension(1000, 1000));
         mainPanel.add(scrollPane, "span, grow, wrap");
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+    
+        // Button Panel - Centering buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        buttonPanel.setBackground(new Color(255, 250, 240));
         JButton addButton = new JButton("Add");
         JButton deleteButton = new JButton("Delete");
         JButton updateButton = new JButton("Update");
         JButton refreshButton = new JButton("Refresh");
 
+        //style masing buttns
+        addButton.setBackground(new Color(255, 160, 122));
+        addButton.setForeground(Color.WHITE);
+        addButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        deleteButton.setBackground(new Color(255, 160, 122));
+        deleteButton.setForeground(Color.WHITE);
+        deleteButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        updateButton.setBackground(new Color(255, 160, 122));
+        updateButton.setForeground(Color.WHITE);
+        updateButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        refreshButton.setBackground(new Color(255, 160, 122));
+        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+    
         addButton.addActionListener(e -> onAdd(listModel));
         deleteButton.addActionListener(e -> onDelete(list.getSelectedValue(), listModel));
         updateButton.addActionListener(e -> onUpdate(list.getSelectedValue(), listModel));
         refreshButton.addActionListener(e -> onRefresh(listModel));
-
+    
         buttonPanel.add(addButton);
         buttonPanel.add(deleteButton);
         buttonPanel.add(updateButton);
         buttonPanel.add(refreshButton);
-
-        mainPanel.add(buttonPanel, "span, wrap");
+    
+        mainPanel.add(buttonPanel, "span, grow, align center, wrap"); // Center-aligning the buttons
         panel.add(mainPanel, BorderLayout.CENTER);
     }
+    
 
     private ImageIcon scaleIcon(ImageIcon icon, int height) {
         Image img = icon.getImage();
@@ -180,6 +206,14 @@ public class JenisDanKategori {
                 KategoriItem item = (KategoriItem) value;
                 label.setIcon(item.icon);
                 label.setText(item.name);
+
+                if (!isSelected) {
+                    if (index % 2 == 0) {
+                        label.setBackground(new Color(255, 250, 240)); // Krem untuk baris genap
+                    } else {
+                        label.setBackground(new Color(255, 239, 213)); // Oranye muda untuk baris ganjil
+                    }
+                }
             }
             return label;
         }

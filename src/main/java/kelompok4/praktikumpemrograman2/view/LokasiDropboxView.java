@@ -1,17 +1,50 @@
 package kelompok4.praktikumpemrograman2.view;
 
-import java.awt.*;
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.Component;
+import java.math.BigDecimal;
+import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 import kelompok4.praktikumpemrograman2.controller.LokasiDropboxController;
 import kelompok4.praktikumpemrograman2.model.LokasiDropbox;
-import net.miginfocom.swing.MigLayout;
 
-import java.math.BigDecimal;
-import java.util.List;
+class AlternatingRowColorRenderer extends DefaultTableCellRenderer {
+    private final Color evenRowColor = new Color(255, 250, 240); // cream
+    private final Color oddRowColor = new Color(255, 239, 213);  // light peach
+
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object value,
+            boolean isSelected, boolean hasFocus, int row, int column) {
+        Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+        if (!isSelected) {
+            Color background = (row % 2 == 0) ? evenRowColor : oddRowColor;
+            component.setBackground(background);
+            setBackground(background);
+        }
+
+        setHorizontalAlignment(SwingConstants.CENTER);
+        
+        return component;
+    }
+}
 
 public class LokasiDropboxView {
     private final LokasiDropboxController dropboxController;
@@ -20,49 +53,69 @@ public class LokasiDropboxView {
 
     public LokasiDropboxView() {
         dropboxController = new LokasiDropboxController();
-        panel = new JPanel(new MigLayout("wrap 2", "[grow, fill][grow, fill]", "[]10[]10[]10[]10[]10[]10[grow]"));
+        panel = new JPanel(new BorderLayout());
         initComponents();
     }
 
     private void initComponents() {
-        // Panel for title
-        JLabel titleLabel = new JLabel("Lokasi Dropbox", JLabel.CENTER);
+        // Panel untuk judul
+        JPanel titlePanel = new JPanel(new BorderLayout());
+        titlePanel.setBackground(new Color(255, 250, 240));
+
+        JLabel titleLabel = new JLabel("Lokasi Dropbox", SwingConstants.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
         titleLabel.setForeground(new Color(139, 0, 0));
-        titleLabel.setOpaque(true);
-        titleLabel.setBackground(new Color(255, 250, 240));
-        panel.add(titleLabel, "span, align center");
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        titlePanel.add(titleLabel, BorderLayout.CENTER);
+
+        panel.add(titlePanel, BorderLayout.NORTH);
 
         // Panel for dropbox list
+        JPanel tablePanel = new JPanel(new BorderLayout());
         String[] columnNames = {"Nama Dropbox", "Alamat", "Jarak", "Kapasitas Max", "Kapasitas Terisi"};
         tableDropbox = new JTable();
         tableDropbox.setModel(new DefaultTableModel(new Object[0][0], columnNames));
 
         // Set table styles
-        tableDropbox.setBackground(new Color(255, 239, 213));
         tableDropbox.getTableHeader().setBackground(new Color(255, 160, 122));
+        tableDropbox.setBackground(new Color(255, 250, 240));
         tableDropbox.setFont(new Font("SansSerif", Font.PLAIN, 14));
         JTableHeader header = tableDropbox.getTableHeader();
         header.setFont(new Font("SansSerif", Font.BOLD, 14));
         header.setForeground(new Color(255, 255, 255));
 
-        // Center-align text in each column
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        // Set the alternating row color renderer
+        AlternatingRowColorRenderer alternatingRenderer = new AlternatingRowColorRenderer();
         for (int i = 0; i < tableDropbox.getColumnCount(); i++) {
-            tableDropbox.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+            tableDropbox.getColumnModel().getColumn(i).setCellRenderer(alternatingRenderer);
         }
 
         JScrollPane scrollPane = new JScrollPane(tableDropbox);
         scrollPane.setPreferredSize(new Dimension(1000, 800));
         tableDropbox.setFillsViewportHeight(true);
-        panel.add(scrollPane, "cell 0 6 2 1");
+        tablePanel.add(scrollPane, BorderLayout.CENTER);
+
+        panel.add(tablePanel, BorderLayout.CENTER);
 
         // Button Panel for Add, Edit, Delete
         JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(new Color(255, 250, 240));
         JButton btnAdd = new JButton("Add Dropbox");
         JButton btnEdit = new JButton("Edit Dropbox");
         JButton btnDelete = new JButton("Delete Dropbox");
+
+        //style btns
+        btnAdd.setBackground(new Color(255, 160, 122));
+        btnAdd.setForeground(Color.WHITE);
+        btnAdd.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        btnEdit.setBackground(new Color(255, 160, 122));
+        btnEdit.setForeground(Color.WHITE);
+        btnEdit.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        btnDelete.setBackground(new Color(255, 160, 122));
+        btnDelete.setForeground(Color.WHITE);
+        btnDelete.setFont(new Font("SansSerif", Font.BOLD, 14));
 
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnEdit);
@@ -73,7 +126,7 @@ public class LokasiDropboxView {
         btnEdit.addActionListener(e -> showEditDropboxDialog());
         btnDelete.addActionListener(e -> deleteDropbox());
 
-        panel.add(buttonPanel, "cell 0 7 2 1");
+        panel.add(buttonPanel, BorderLayout.SOUTH);
 
         loadDropboxData();
     }
@@ -165,6 +218,8 @@ public class LokasiDropboxView {
         JTextField txtKapasitasTerisi = new JTextField(existingDropbox != null ? existingDropbox.getKapasitasTerisi().toString() : "");
 
         JPanel panel = new JPanel(new GridLayout(5, 2));
+        panel.setBackground(new Color(255, 250, 240)); // Cream background
+
         panel.add(new JLabel("Nama Dropbox:"));
         panel.add(txtNamaDropbox);
         panel.add(new JLabel("Alamat:"));

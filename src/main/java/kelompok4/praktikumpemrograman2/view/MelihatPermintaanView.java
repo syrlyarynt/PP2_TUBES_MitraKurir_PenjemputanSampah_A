@@ -69,6 +69,21 @@ public class MelihatPermintaanView extends JFrame {
                 return c;
             }
         };
+        
+        // bwt warna header tabel
+        pickupTable.getTableHeader().setDefaultRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus, int row, int column) {
+                JLabel headerLabel = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                headerLabel.setBackground(new Color(255, 160, 122)); // Warna oranye muda
+                headerLabel.setForeground(Color.WHITE);             // Warna teks putih
+                headerLabel.setFont(new Font("SansSerif", Font.BOLD, 14)); // Font tebal
+                headerLabel.setHorizontalAlignment(SwingConstants.CENTER); // Teks di tengah
+                return headerLabel;
+            }
+        });
+        pickupTable.setBackground(new Color(255, 250, 240));
 
         JScrollPane tableScrollPane = new JScrollPane(pickupTable);
         panel.add(tableScrollPane, BorderLayout.CENTER);
@@ -78,15 +93,18 @@ public class MelihatPermintaanView extends JFrame {
 
         pickupButton.setBackground(new Color(255, 160, 122));
         pickupButton.setForeground(Color.WHITE);
+        pickupButton.setFont(new Font("SansSerif", Font.BOLD, 14));
         pickupButton.addActionListener(e -> handlePickup());
 
-        addButton.setBackground(new Color(60, 179, 113));
+        addButton.setBackground(new Color(255, 160, 122));
         addButton.setForeground(Color.WHITE);
+        addButton.setFont(new Font("SansSerif", Font.BOLD, 14));
         addButton.addActionListener(e -> showAddRequestForm());
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.add(addButton);
         buttonPanel.add(pickupButton);
+        buttonPanel.setBackground(new Color(255, 250, 240));
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
         loadPermintaanData();
