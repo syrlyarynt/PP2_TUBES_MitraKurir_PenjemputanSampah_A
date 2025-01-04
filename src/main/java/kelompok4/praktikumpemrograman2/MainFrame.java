@@ -4,12 +4,7 @@ import javax.swing.*;
 
 import com.formdev.flatlaf.intellijthemes.FlatGrayIJTheme;
 
-import kelompok4.praktikumpemrograman2.view.JenisDanKategori;
-import kelompok4.praktikumpemrograman2.view.MelihatPermintaanView;
-import kelompok4.praktikumpemrograman2.view.MenerimaPermintaanView;
-import kelompok4.praktikumpemrograman2.view.LokasiDropbox;
-import kelompok4.praktikumpemrograman2.view.TotalSampah;
-import kelompok4.praktikumpemrograman2.view.HistoryPenjemputan;
+import kelompok4.praktikumpemrograman2.view.*;
 import kelompok4.praktikumpemrograman2.controller.JenisKategoriController;
 import kelompok4.praktikumpemrograman2.services.JenisKategoriService;
 import kelompok4.praktikumpemrograman2.model.MyBatisUtil;
@@ -35,9 +30,11 @@ public class MainFrame {
             tabbedPane.addTab("Jenis dan Kategori", new JenisDanKategori(controller).getPanel());
             tabbedPane.addTab("Permintaan Penjemputan", new MelihatPermintaanView().getPanel());
             tabbedPane.addTab("Menerima Permintaan Penjemputan", new MenerimaPermintaanView().getPanel());
-            tabbedPane.addTab("Lokasi Dropbox", new LokasiDropbox().getPanel());
-            tabbedPane.addTab("Total Sampah", new TotalSampah().getPanel());
+            tabbedPane.addTab("Lokasi Dropbox", new LokasiDropboxView().getPanel());
+            tabbedPane.addTab("Total Sampah", new TotalSampahView().getPanel());
             tabbedPane.addTab("History Penjemputan", new HistoryPenjemputan().getPanel());
+            tabbedPane.addTab("Dropbox Rate", new DropboxRateView().getMainPanel());
+
         } catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Error initializing database connection: " + e.getMessage());

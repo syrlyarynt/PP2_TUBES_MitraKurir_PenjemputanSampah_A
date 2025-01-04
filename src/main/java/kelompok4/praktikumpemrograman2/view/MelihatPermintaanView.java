@@ -1,15 +1,19 @@
 package kelompok4.praktikumpemrograman2.view;
 
 import kelompok4.praktikumpemrograman2.controller.PermintaanPenjemputanController;
+import kelompok4.praktikumpemrograman2.controller.PickupAssignmentController;
 import kelompok4.praktikumpemrograman2.model.JenisKategori;
 import kelompok4.praktikumpemrograman2.model.PermintaanPenjemputan;
 import kelompok4.praktikumpemrograman2.model.LokasiDropbox;
+import kelompok4.praktikumpemrograman2.model.PickupAssignment;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class MelihatPermintaanView extends JFrame {
@@ -121,14 +125,112 @@ public class MelihatPermintaanView extends JFrame {
         if (selectedRow >= 0) {
             int idPermintaan = (int) tableModel.getValueAt(selectedRow, 0);
             PermintaanPenjemputan permintaan = controller.getPermintaanById(idPermintaan);
+
             if (permintaan != null) {
-                permintaan.setStatus("Dalam Proses");
-                controller.updatePermintaan(permintaan);
-                loadPermintaanData();
-                JOptionPane.showMessageDialog(this, "Permintaan pickup diproses.");
+                try {
+                    // Create new PickupAssignment
+                    PickupAssignment assignment = new PickupAssignment();
+                    assignment.setPermintaanId(permintaan.getIdPermintaan());
+
+                    // Handle null dropboxId
+                    Integer dropboxId = permintaan.getDropboxId();
+                    if (dropboxId == null) {
+                        // If no dropbox is assigned, show dropbox selection dialog
+                        List<LokasiDropbox> dropboxList = controller.getAllDropbox();
+                        LokasiDropbox selectedDropbox = (LokasiDropbox) JOptionPane.showInputDialog(
+                                this,
+                                "Pilih Dropbox untuk assignment:",
+                                "Pilih Dropbox",
+                                JOptionPane.QUESTION_MESSAGE,
+                                null,
+                                dropboxList.toArray(),
+                                dropboxList.get(0)
+                        );
+
+                        if (selectedDropbox == null) {
+                            JOptionPane.showMessageDialog(this,
+                                    "Harus memilih dropbox untuk melanjutkan pickup.",
+                                    "Peringatan",
+                                    JOptionPane.WARNING_MESSAGE);
+                            return;
+                        }
+
+                        dropboxId = selectedDropbox.getId();
+
+                        // Update permintaan with selected dropbox
+                        permintaan.setDropboxId(dropboxId);
+                        controller.updatePermintaan(permintaan);
+                    }
+
+                    assignment.setDropboxId(dropboxId);
+                    assignment.setStatus("Assigned");
+                    assignment.setPickupDate(LocalDateTime.now());
+                    assignment.setTotalWeight(permintaan.getBerat());
+                    assignment.setTotalCost(permintaan.getHarga());
+
+                    // Get the PickupAssignment controller and create the assignment
+                    PickupAssignmentController pickupController = new PickupAssignmentController();
+                    pickupController.createAssignment(assignment);
+
+                    // Update permintaan status
+                    permintaan.setStatus("Dalam Proses");
+                    controller.updatePermintaan(permintaan);
+
+                    // Refresh the table
+                    loadPermintaanData();
+
+                    // Show success message
+                    JOptionPane.showMessageDialog(this,
+                            "Permintaan pickup telah diproses dan ditugaskan untuk penjemputan.",
+                            "Sukses",
+                            JOptionPane.INFORMATION_MESSAGE);
+
+                    // Show the MenerimaPermintaanView
+                    MenerimaPermintaanView menerimaView = new MenerimaPermintaanView();
+
+                    // Set data for the first table (pickup details)
+                    String[][] pickupData = {
+                            {
+                                    permintaan.getNamaPelanggan(),
+                                    permintaan.getAlamat(),
+                                    permintaan.getBerat().toString(),
+                                    permintaan.getHarga() != null ? permintaan.getHarga().toString() : "0"
+                            }
+                    };
+                    menerimaView.setPickupData(pickupData);
+
+                    // Set data for the second table (dropbox locations)
+                    List<LokasiDropbox> dropboxList = controller.getAllDropbox();
+                    String[][] dropboxData = dropboxList.stream()
+                            .map(dropbox -> new String[]{
+                                    dropbox.getNamaDropbox(),
+                                    dropbox.getAlamat(),
+                                    dropbox.getJarak().toString() + " KM"
+                            })
+                            .toArray(String[][]::new);
+                    menerimaView.setSecondTableData(dropboxData);
+
+                    // Display the window
+                    menerimaView.setVisible(true);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(this,
+                            "Terjadi kesalahan saat memproses pickup: " + e.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Data permintaan tidak ditemukan.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Pilih permintaan untuk pickup.");
+            JOptionPane.showMessageDialog(this,
+                    "Pilih permintaan untuk pickup terlebih dahulu.",
+                    "Peringatan",
+                    JOptionPane.WARNING_MESSAGE);
         }
     }
 

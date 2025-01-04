@@ -45,19 +45,37 @@ public interface PermintaanPenjemputanMapper {
 
 
     // Fetch permintaan by ID
-    @Select("SELECT * FROM permintaanpenjemputan WHERE IDpermintaan = #{id}")
+    @Select("""
+    SELECT 
+        p.IDpermintaan, 
+        p.namaPelanggan, 
+        p.alamat, 
+        p.kategoriSampah AS kategoriSampahId,
+        k.nama AS kategoriSampah,
+        p.berat, 
+        p.harga, 
+        p.waktuPermintaan, 
+        p.status, 
+        p.dropbox_id AS dropboxId, 
+        d.nama_dropbox, 
+        d.kapasitas_max, 
+        d.kapasitas_terisi,
+        p.total_biaya
+    FROM permintaanpenjemputan p
+    LEFT JOIN lokasi_dropbox d ON p.dropbox_id = d.id
+    LEFT JOIN jenis_kategori k ON p.kategoriSampah = k.id
+    WHERE p.IDpermintaan = #{id}
+""")
     @ResultMap("permintaanResultMap")
     PermintaanPenjemputan getPermintaanById(@Param("id") int id);
 
     // Insert new permintaan
-    @Insert("""
-    INSERT INTO permintaanpenjemputan 
-    (namaPelanggan, alamat, kategoriSampah, berat, harga, waktuPermintaan, status, dropbox_id, total_biaya, created_at)
-    VALUES (#{namaPelanggan}, #{alamat}, #{kategoriSampahId}, #{berat}, #{harga,jdbcType=NUMERIC}, #{waktuPermintaan}, #{status}, #{dropboxId}, #{totalBiaya}, CURRENT_TIMESTAMP)
-""")
+    @Insert("INSERT INTO permintaanpenjemputan " +
+            "(namaPelanggan, alamat, kategoriSampah, berat, status, dropbox_id) " +
+            "VALUES " +
+            "(#{namaPelanggan}, #{alamat}, #{kategoriSampahId}, #{berat}, 'Menunggu', #{dropboxId})")
     @Options(useGeneratedKeys = true, keyProperty = "idPermintaan", keyColumn = "IDpermintaan")
     void insertPermintaan(PermintaanPenjemputan permintaan);
-
 
 
     @Select("SELECT LAST_INSERT_ID()")
@@ -67,11 +85,15 @@ public interface PermintaanPenjemputanMapper {
 
 
     // Update existing permintaan
-    @Update("UPDATE permintaanpenjemputan SET namaPelanggan = #{namaPelanggan}, " +
-            "alamat = #{alamat}, kategoriSampah = #{kategoriSampahId}, " +
-            "berat = #{berat}, harga = #{harga}, waktuPermintaan = #{waktuPermintaan}, " +
-            "status = #{status}, dropbox_id = #{dropboxId}, total_biaya = #{totalBiaya} " +
-            "WHERE IDpermintaan = #{idPermintaan}")
+//    @Update("UPDATE permintaanpenjemputan SET namaPelanggan = #{namaPelanggan}, " +
+//            "alamat = #{alamat}, kategoriSampah = #{kategoriSampahId}, " +
+//            "berat = #{berat}, harga = #{harga}, waktuPermintaan = #{waktuPermintaan}, " +
+//            "status = #{status}, dropbox_id = #{dropboxId}, total_biaya = #{totalBiaya} " +
+//            "WHERE IDpermintaan = #{idPermintaan}")
+//    void updatePermintaan(PermintaanPenjemputan permintaan);
+
+    // Update existing permintaan - Hanya update status
+    @Update("UPDATE permintaanpenjemputan SET status = #{status} WHERE IDpermintaan = #{idPermintaan}")
     void updatePermintaan(PermintaanPenjemputan permintaan);
 
     // Delete permintaan by ID

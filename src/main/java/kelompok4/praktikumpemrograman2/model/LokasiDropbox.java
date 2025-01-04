@@ -49,4 +49,9 @@ public class LokasiDropbox {
     public void setRates(List<DropboxRate> rates) {
         this.rates = rates;
     }
+
+    @Override
+    public String toString() {
+        return namaDropbox; // Tampilkan hanya namaDropbox
+    }
 }

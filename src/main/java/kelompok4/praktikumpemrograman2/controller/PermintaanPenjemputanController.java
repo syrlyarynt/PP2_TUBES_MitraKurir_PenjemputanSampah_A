@@ -8,6 +8,7 @@ import org.apache.ibatis.session.SqlSession;
 import kelompok4.praktikumpemrograman2.model.MyBatisUtil;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class PermintaanPenjemputanController {
@@ -40,27 +41,44 @@ public class PermintaanPenjemputanController {
             if (berat <= 0) {
                 throw new IllegalArgumentException("Berat harus lebih dari 0.");
             }
-            if (!service.isKategoriExists(kategoriSampahId)) {
-                throw new IllegalArgumentException("Kategori sampah tidak valid.");
-            }
-            if (dropboxId != null && !service.isDropboxExists(dropboxId)) {
-                throw new IllegalArgumentException("Lokasi Dropbox tidak valid.");
-            }
 
-            // Buat objek permintaan
+            // Buat objek permintaan dengan nilai default yang tidak null
             PermintaanPenjemputan permintaan = new PermintaanPenjemputan();
             permintaan.setNamaPelanggan(nama);
             permintaan.setAlamat(alamat);
             permintaan.setKategoriSampahId(kategoriSampahId);
             permintaan.setBerat(BigDecimal.valueOf(berat));
             permintaan.setDropboxId(dropboxId);
-//            permintaan.setLokasiDropbox(lokasiDropbox);
-            permintaan.setHarga(harga); // Bisa null
-            permintaan.setStatus("Menunggu");
 
-            // Insert permintaan
-            service.createPermintaan(permintaan);
-            System.out.println("Data berhasil ditambahkan: " + permintaan);
+            // Set nilai default untuk field yang required di database
+            permintaan.setStatus("Menunggu");
+            permintaan.setWaktuPermintaan(LocalDateTime.now());
+            permintaan.setTotalBiaya(BigDecimal.ZERO);  // Set default 0 jika belum dihitung
+
+            // Hitung harga default jika null (bisa disesuaikan dengan business logic)
+            if (harga == null) {
+                BigDecimal defaultHarga = BigDecimal.valueOf(8000); // harga default per kg
+                permintaan.setHarga(defaultHarga.multiply(BigDecimal.valueOf(berat)));
+            } else {
+                permintaan.setHarga(harga);
+            }
+
+            // Debug log sebelum insert
+            System.out.println("=== Data yang akan diinsert ===");
+            System.out.println(permintaan.toString());
+
+            // Insert dengan explicit transaction
+            SqlSession session = MyBatisUtil.getSqlSession();
+            try {
+                service.createPermintaan(permintaan);
+                session.commit();
+                System.out.println("Data berhasil ditambahkan: " + permintaan);
+            } catch (Exception e) {
+                session.rollback();
+                throw e;
+            } finally {
+                session.close();
+            }
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -23,6 +23,7 @@
         <mapper class="kelompok4.praktikumpemrograman2.model.PermintaanPenjemputanMapper"></mapper>
         <mapper class="kelompok4.praktikumpemrograman2.model.DropboxRateMapper"/>
         <mapper class="kelompok4.praktikumpemrograman2.model.PickupAssignmentMapper"/>
+        <mapper class="kelompok4.praktikumpemrograman2.model.TotalSampahMapper"/>
 
     </mappers>
 </configuration>

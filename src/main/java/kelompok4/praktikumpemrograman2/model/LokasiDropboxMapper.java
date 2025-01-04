@@ -32,6 +32,4 @@ public interface LokasiDropboxMapper {
 
     @Delete("DELETE FROM lokasi_dropbox WHERE id = #{id}")
     void deleteDropbox(@Param("id") int id);
-
-
 }

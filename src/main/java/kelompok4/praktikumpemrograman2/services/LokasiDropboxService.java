@@ -8,9 +8,11 @@ import java.util.List;
 
 public class LokasiDropboxService {
     private final LokasiDropboxMapper mapper;
+    private final SqlSession sqlSession;
 
     public LokasiDropboxService(SqlSession sqlSession) {
         this.mapper = sqlSession.getMapper(LokasiDropboxMapper.class);
+        this.sqlSession = sqlSession;
     }
 
     public List<LokasiDropbox> getAllDropbox() {
@@ -26,10 +28,27 @@ public class LokasiDropboxService {
     }
 
     public void updateDropbox(LokasiDropbox dropbox) {
-        mapper.updateDropbox(dropbox);
+        try {
+            mapper.updateDropbox(dropbox);
+            sqlSession.commit(); // Add transaction commit
+        } catch (Exception e) {
+            sqlSession.rollback(); // Add transaction rollback
+            throw e;
+        }
     }
 
     public void deleteDropbox(int id) {
-        mapper.deleteDropbox(id);
+        try {
+            mapper.deleteDropbox(id);
+            sqlSession.commit(); // Add transaction commit
+        } catch (Exception e) {
+            sqlSession.rollback(); // Add transaction rollback
+            throw e;
+        }
     }
+
+
+
+
+
 }
