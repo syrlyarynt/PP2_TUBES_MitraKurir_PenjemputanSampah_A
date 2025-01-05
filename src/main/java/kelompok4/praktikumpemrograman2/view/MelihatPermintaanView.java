@@ -69,7 +69,7 @@ public class MelihatPermintaanView extends JFrame {
                 return c;
             }
         };
-        
+
         // bwt warna header tabel
         pickupTable.getTableHeader().setDefaultRenderer(new DefaultTableCellRenderer() {
             @Override
@@ -107,7 +107,7 @@ public class MelihatPermintaanView extends JFrame {
         buttonPanel.setBackground(new Color(255, 250, 240));
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
-        loadPermintaanData();
+        loadPermintaanDataInBackground();
 
         setContentPane(panel);
         pack();
@@ -124,7 +124,6 @@ public class MelihatPermintaanView extends JFrame {
         for (PermintaanPenjemputan permintaan : permintaanList) {
             LokasiDropbox dropbox = permintaan.getLokasiDropbox();
             String dropboxName = (dropbox != null) ? dropbox.getNamaDropbox() : "-";
-
             tableModel.addRow(new Object[]{
                     permintaan.getIdPermintaan(),
                     permintaan.getNamaPelanggan(),
@@ -138,117 +137,112 @@ public class MelihatPermintaanView extends JFrame {
         }
     }
 
+    private void loadPermintaanDataInBackground() {
+        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Void doInBackground() {
+                loadPermintaanData();
+                return null;
+            }
+        };
+        worker.execute();
+    }
+
     private void handlePickup() {
         int selectedRow = pickupTable.getSelectedRow();
         if (selectedRow >= 0) {
-            int idPermintaan = (int) tableModel.getValueAt(selectedRow, 0);
-            PermintaanPenjemputan permintaan = controller.getPermintaanById(idPermintaan);
+            final int idPermintaan = (int) tableModel.getValueAt(selectedRow, 0);
+            final PermintaanPenjemputan permintaan = controller.getPermintaanById(idPermintaan);
 
             if (permintaan != null) {
-                try {
-                    // Create new PickupAssignment
-                    PickupAssignment assignment = new PickupAssignment();
-                    assignment.setPermintaanId(permintaan.getIdPermintaan());
+                SwingWorker<Void, Void> worker = new SwingWorker<>() {
+                    @Override
+                    protected Void doInBackground() {
+                        try {
 
-                    // Handle null dropboxId
-                    Integer dropboxId = permintaan.getDropboxId();
-                    if (dropboxId == null) {
-                        // If no dropbox is assigned, show dropbox selection dialog
-                        List<LokasiDropbox> dropboxList = controller.getAllDropbox();
-                        LokasiDropbox selectedDropbox = (LokasiDropbox) JOptionPane.showInputDialog(
-                                this,
-                                "Pilih Dropbox untuk assignment:",
-                                "Pilih Dropbox",
-                                JOptionPane.QUESTION_MESSAGE,
-                                null,
-                                dropboxList.toArray(),
-                                dropboxList.get(0)
-                        );
+                            Integer dropboxId = permintaan.getDropboxId();
+                            if (dropboxId == null) {
+                                List<LokasiDropbox> dropboxList = controller.getAllDropbox();
+                                LokasiDropbox selectedDropbox = (LokasiDropbox) JOptionPane.showInputDialog(
+                                        MelihatPermintaanView.this,
+                                        "Pilih Dropbox untuk assignment:",
+                                        "Pilih Dropbox",
+                                        JOptionPane.QUESTION_MESSAGE,
+                                        null,
+                                        dropboxList.toArray(),
+                                        dropboxList.get(0)
+                                );
 
-                        if (selectedDropbox == null) {
-                            JOptionPane.showMessageDialog(this,
-                                    "Harus memilih dropbox untuk melanjutkan pickup.",
-                                    "Peringatan",
-                                    JOptionPane.WARNING_MESSAGE);
-                            return;
-                        }
-
-                        dropboxId = selectedDropbox.getId();
-
-                        // Update permintaan with selected dropbox
-                        permintaan.setDropboxId(dropboxId);
-                        controller.updatePermintaan(permintaan);
-                    }
-
-                    assignment.setDropboxId(dropboxId);
-                    assignment.setStatus("Assigned");
-                    assignment.setPickupDate(LocalDateTime.now());
-                    assignment.setTotalWeight(permintaan.getBerat());
-                    assignment.setTotalCost(permintaan.getHarga());
-
-                    // Get the PickupAssignment controller and create the assignment
-                    PickupAssignmentController pickupController = new PickupAssignmentController();
-                    pickupController.createAssignment(assignment);
-
-                    // Update permintaan status
-                    permintaan.setStatus("Dalam Proses");
-                    controller.updatePermintaan(permintaan);
-
-                    // Refresh the table
-                    loadPermintaanData();
-
-                    // Show success message
-                    JOptionPane.showMessageDialog(this,
-                            "Permintaan pickup telah diproses dan ditugaskan untuk penjemputan.",
-                            "Sukses",
-                            JOptionPane.INFORMATION_MESSAGE);
-
-                    // Show the MenerimaPermintaanView
-                    MenerimaPermintaanView menerimaView = new MenerimaPermintaanView();
-
-                    // Set data for the first table (pickup details)
-                    String[][] pickupData = {
-                            {
-                                    permintaan.getNamaPelanggan(),
-                                    permintaan.getAlamat(),
-                                    permintaan.getBerat().toString(),
-                                    permintaan.getHarga() != null ? permintaan.getHarga().toString() : "0"
+                                if (selectedDropbox == null) {
+                                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(
+                                            MelihatPermintaanView.this,
+                                            "Harus memilih dropbox untuk melanjutkan pickup.",
+                                            "Peringatan",
+                                            JOptionPane.WARNING_MESSAGE
+                                    ));
+                                    return null;
+                                }
+                                dropboxId = selectedDropbox.getId();
                             }
-                    };
-                    menerimaView.setPickupData(pickupData);
 
-                    // Set data for the second table (dropbox locations)
-                    List<LokasiDropbox> dropboxList = controller.getAllDropbox();
-                    String[][] dropboxData = dropboxList.stream()
-                            .map(dropbox -> new String[]{
-                                    dropbox.getNamaDropbox(),
-                                    dropbox.getAlamat(),
-                                    dropbox.getJarak().toString() + " KM"
-                            })
-                            .toArray(String[][]::new);
-                    menerimaView.setSecondTableData(dropboxData);
+                            // Create new PickupAssignment
+                            PickupAssignment assignment = new PickupAssignment();
+                            assignment.setPermintaanId(permintaan.getIdPermintaan());
+                            assignment.setDropboxId(dropboxId);
+                            assignment.setStatus("Assigned");
+                            assignment.setPickupDate(LocalDateTime.now());
+                            assignment.setTotalWeight(permintaan.getBerat());
+                            assignment.setTotalCost(permintaan.getHarga());
 
-                    // Display the window
-                    menerimaView.setVisible(true);
+                            // Save assignment using PickupAssignmentController
+                            PickupAssignmentController pickupController = new PickupAssignmentController();
+                            pickupController.createAssignment(assignment);
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(this,
-                            "Terjadi kesalahan saat memproses pickup: " + e.getMessage(),
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                }
+                            // Update permintaan status
+                            permintaan.setStatus("Dalam Proses");
+                            controller.updatePermintaan(permintaan);
+
+                            // Notify success and reload data
+                            SwingUtilities.invokeLater(() -> {
+                                JOptionPane.showMessageDialog(
+                                        MelihatPermintaanView.this,
+                                        "Pickup berhasil diproses.",
+                                        "Sukses",
+                                        JOptionPane.INFORMATION_MESSAGE
+                                );
+                                loadPermintaanDataInBackground(); // Refresh the table
+                            });
+
+                        } catch (Exception e) {
+                            SwingUtilities.invokeLater(() -> {
+                                e.printStackTrace();
+                                JOptionPane.showMessageDialog(
+                                        MelihatPermintaanView.this,
+                                        "Terjadi kesalahan saat memproses pickup: " + e.getMessage(),
+                                        "Error",
+                                        JOptionPane.ERROR_MESSAGE
+                                );
+                            });
+                        }
+                        return null;
+                    }
+                };
+                worker.execute();
             } else {
-                JOptionPane.showMessageDialog(this,
+                JOptionPane.showMessageDialog(
+                        this,
                         "Data permintaan tidak ditemukan.",
                         "Error",
-                        JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         } else {
-            JOptionPane.showMessageDialog(this,
+            JOptionPane.showMessageDialog(
+                    this,
                     "Pilih permintaan untuk pickup terlebih dahulu.",
                     "Peringatan",
-                    JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.WARNING_MESSAGE
+            );
         }
     }
 
@@ -310,10 +304,6 @@ public class MelihatPermintaanView extends JFrame {
                 String nama = namaField.getText().trim();
                 String alamat = alamatField.getText().trim();
                 String beratStr = beratField.getText().trim();
-                System.out.println("=== Input Values ===");
-                System.out.println("Nama: " + nama);
-                System.out.println("Alamat: " + alamat);
-                System.out.println("Berat: " + beratStr);
                 if (nama.isEmpty() || alamat.isEmpty() || beratStr.isEmpty()) {
                     JOptionPane.showMessageDialog(this,
                             "Semua field harus diisi!",
@@ -343,8 +333,7 @@ public class MelihatPermintaanView extends JFrame {
                     JOptionPane.showMessageDialog(this,
                             "Silakan pilih jenis sampah!",
                             "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                    return;
+                            JOptionPane.ERROR_MESSAGE);return;
                 }
 
                 // Get and validate selected dropbox
@@ -407,7 +396,4 @@ public class MelihatPermintaanView extends JFrame {
             }
         }
     }
-
-
-
 }

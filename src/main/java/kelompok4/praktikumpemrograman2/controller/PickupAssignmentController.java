@@ -2,17 +2,23 @@ package kelompok4.praktikumpemrograman2.controller;
 
 import kelompok4.praktikumpemrograman2.model.PickupAssignment;
 import kelompok4.praktikumpemrograman2.services.PickupAssignmentService;
+import kelompok4.praktikumpemrograman2.model.History;
+import kelompok4.praktikumpemrograman2.services.HistoryService;
 import kelompok4.praktikumpemrograman2.model.MyBatisUtil;
 import org.apache.ibatis.session.SqlSession;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class PickupAssignmentController {
     private final PickupAssignmentService service;
+    private final HistoryService historyService;
     private final SqlSession sqlSession;
 
     public PickupAssignmentController() {
         this.sqlSession = MyBatisUtil.getSqlSession();
         this.service = new PickupAssignmentService(sqlSession);
+        this.historyService = new HistoryService(sqlSession);
         System.out.println("PickupAssignmentController initialized");
     }
 
@@ -36,7 +42,6 @@ public class PickupAssignmentController {
 
     public void createAssignment(PickupAssignment assignment) {
         try {
-            // Set initial status if not set
             if (assignment.getStatus() == null || assignment.getStatus().isEmpty()) {
                 assignment.setStatus("Assigned");
             }
@@ -49,7 +54,6 @@ public class PickupAssignmentController {
 
     public void updateAssignment(PickupAssignment assignment) {
         try {
-            // Validate status transition
             PickupAssignment existing = service.getAssignmentById(assignment.getId());
             if (existing != null) {
                 validateStatusTransition(existing.getStatus(), assignment.getStatus());
@@ -71,12 +75,10 @@ public class PickupAssignmentController {
     }
 
     private void validateStatusTransition(String currentStatus, String newStatus) {
-        // Define valid status transitions
         boolean isValid = switch (currentStatus) {
-            case "Assigned" -> newStatus.equals("In Progress") || newStatus.equals("Cancelled");
+            case "Assigned" -> newStatus.equals("In Progress") || newStatus.equals("Cancelled") || newStatus.startsWith("Rejected");
             case "In Progress" -> newStatus.equals("Completed") || newStatus.equals("Cancelled");
-            case "Completed" -> false; // Final state, no transitions allowed
-            case "Cancelled" -> false; // Final state, no transitions allowed
+            case "Completed", "Cancelled" -> false; // Final states
             default -> false;
         };
 
@@ -96,7 +98,7 @@ public class PickupAssignmentController {
             assignment.setStatus("Completed");
             assignment.setBeratAktual(new java.math.BigDecimal(actualWeight));
             assignment.setHargaFinal(new java.math.BigDecimal(finalPrice));
-            assignment.setCompletionDate(java.time.LocalDateTime.now());
+            assignment.setCompletionDate(LocalDateTime.now());
             assignment.setNotes(notes);
 
             service.updateAssignment(assignment);
@@ -107,19 +109,33 @@ public class PickupAssignmentController {
         }
     }
 
-    public boolean cancelAssignment(int id, String reason) {
+    public boolean rejectAssignment(int id, String reason) {
         try {
             PickupAssignment assignment = service.getAssignmentById(id);
             if (assignment == null) {
                 throw new IllegalArgumentException("Assignment not found with id: " + id);
             }
 
-            assignment.setStatus("Cancelled");
+            // Update the assignment's status to "Rejected"
+            assignment.setStatus("Rejected - " + reason);
             assignment.setNotes(reason);
             service.updateAssignment(assignment);
+
+            // Record the rejection in the history table
+            History history = new History();
+            history.setPickupAssignmentId(id);
+            history.setWaktuSelesai(LocalDateTime.now());
+            history.setLokasi(assignment.getDropbox().getNamaDropbox());
+            history.setKategoriSampah(assignment.getPermintaan().getKategoriSampahId());
+            history.setBeratSampah(assignment.getTotalWeight());
+            history.setHarga(assignment.getTotalCost());
+            history.setStatusPenyelesaian("Ditolak - " + reason);
+
+            historyService.insertHistory(history);
+
             return true;
         } catch (Exception e) {
-            System.err.println("Error cancelling assignment: " + e.getMessage());
+            System.err.println("Error rejecting assignment: " + e.getMessage());
             return false;
         }
     }
@@ -135,11 +151,27 @@ public class PickupAssignmentController {
         }
     }
 
-    // Cleanup method
     public void cleanup() {
         if (sqlSession != null) {
             sqlSession.close();
             System.out.println("PickupAssignmentController cleanup completed");
+        }
+    }
+
+    public boolean updateAssignmentStatus(int id, String newStatus) {
+        try {
+            PickupAssignment assignment = service.getAssignmentById(id);
+            if (assignment == null) {
+                throw new IllegalArgumentException("Assignment not found with id: " + id);
+            }
+
+            validateStatusTransition(assignment.getStatus(), newStatus);
+            assignment.setStatus(newStatus);
+            service.updateAssignment(assignment);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error updating assignment status: " + e.getMessage());
+            return false;
         }
     }
 }
