@@ -7,6 +7,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class HistoryPenjemputan {
 
         // Setup tabel
         String[] columnNames = {
-                "ID Riwayat", "Waktu Selesai", "Lokasi",
+                "ID Riwayat", "id, pickup assignment", "Waktu Selesai", "Lokasi",
                 "Kategori Sampah", "Berat (Kg)", "Harga (Rp)",
                 "Status"
         };
@@ -70,6 +71,40 @@ public class HistoryPenjemputan {
         return mainPanel;
     }
 
+//    private void setupTableProperties() {
+//        table.setBackground(new Color(255, 239, 213));
+//        table.setForeground(Color.BLACK);
+//        table.setFont(new Font("SansSerif", Font.PLAIN, 14));
+//
+//        // Header styling
+//        table.getTableHeader().setBackground(new Color(255, 160, 122));
+//        table.getTableHeader().setForeground(Color.WHITE);
+//        table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
+//
+//        // Cell renderer for alternating colors and center alignment
+//        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer() {
+//            @Override
+//            public Component getTableCellRendererComponent(JTable table, Object value,
+//                                                           boolean isSelected, boolean hasFocus, int row, int column) {
+//                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+//                if (!isSelected) {
+//                    String status = column == 6 ? (String) table.getValueAt(row, column) : null;
+//                    if ("Belum Selesai".equals(status)) {
+//                        c.setBackground(new Color(255, 200, 200));
+//                    } else {
+//                        c.setBackground(row % 2 == 0 ? new Color(255, 250, 240) : new Color(255, 239, 213));
+//                    }
+//                }
+//                setHorizontalAlignment(SwingConstants.CENTER);
+//                return c;
+//            }
+//        };
+//
+//        for (int i = 0; i < table.getColumnCount(); i++) {
+//            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+//        }
+//    }
+
     private void setupTableProperties() {
         table.setBackground(new Color(255, 239, 213));
         table.setForeground(Color.BLACK);
@@ -80,14 +115,22 @@ public class HistoryPenjemputan {
         table.getTableHeader().setForeground(Color.WHITE);
         table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
 
-        // Cell renderer for alternating colors and center alignment
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer() {
+        // Custom Cell Renderer
+        DefaultTableCellRenderer customRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
                                                            boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                // Format BigDecimal to String
+                if (value instanceof BigDecimal) {
+                    value = ((BigDecimal) value).setScale(2, BigDecimal.ROUND_HALF_UP).toString();
+                    setText((String) value);
+                }
+
+                // Alternate Row Color
                 if (!isSelected) {
-                    String status = column == 6 ? (String) table.getValueAt(row, column) : null;
+                    String status = column == 7 ? (String) table.getValueAt(row, column) : null; // Status column
                     if ("Belum Selesai".equals(status)) {
                         c.setBackground(new Color(255, 200, 200));
                     } else {
@@ -100,7 +143,7 @@ public class HistoryPenjemputan {
         };
 
         for (int i = 0; i < table.getColumnCount(); i++) {
-            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+            table.getColumnModel().getColumn(i).setCellRenderer(customRenderer);
         }
     }
 
@@ -119,7 +162,8 @@ public class HistoryPenjemputan {
                 System.out.println("Processing record ID: " + history.getIdRiwayat());
                 Object[] rowData = new Object[]{
                         history.getIdRiwayat(),
-                        history.getWaktuSelesai().format(formatter),
+                        history.getPickupAssignmentId() != null ? history.getPickupAssignmentId() : "N/A",
+                        history.getWaktuSelesai() != null ? history.getWaktuSelesai().format(formatter) : "N/A",
                         history.getLokasi(),
                         history.getKategoriSampah(),
                         history.getBeratSampah(),
