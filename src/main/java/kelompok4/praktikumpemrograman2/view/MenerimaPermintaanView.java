@@ -25,6 +25,7 @@ public class MenerimaPermintaanView extends JFrame {
     private LokasiDropbox selectedDropbox;
     private JButton terimaButton;
     private JButton tolakButton;
+    private JButton refreshButton;
 
     // Constructor untuk tab panel
     public MenerimaPermintaanView() {
@@ -157,9 +158,16 @@ public class MenerimaPermintaanView extends JFrame {
         tolakButton.setFont(new Font("SansSerif", Font.BOLD, 14));
         tolakButton.addActionListener(e -> handleTolak());
 
+        // Tombol Refresh
+        refreshButton = new JButton("Refresh");
+        refreshButton.setBackground(new Color(70, 130, 180)); // Warna biru tema
+        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+
         // Always add buttons but enable/disable based on assignment
         buttonPanel.add(terimaButton);
         buttonPanel.add(tolakButton);
+        buttonPanel.add(refreshButton);
 
         // Enable/disable based on assignment
         boolean hasAssignment = controller.hasActiveAssignment();
