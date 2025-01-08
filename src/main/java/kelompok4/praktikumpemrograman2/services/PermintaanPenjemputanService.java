@@ -45,14 +45,26 @@ public class PermintaanPenjemputanService {
         return mapper.isDropboxExists(id) > 0;
     }
 
-
+    
 
     public List<PermintaanPenjemputan> getAllPermintaan() {
-        logger.debug("Fetching all permintaan");
+        System.out.println("=== PermintaanPenjemputanController.getAllPermintaan START ===");
+        sqlSession.clearCache();
         List<PermintaanPenjemputan> permintaanList = mapper.getAllPermintaan();
-        logger.debug("Retrieved {} permintaan records", permintaanList.size());
+        
+        if (permintaanList == null || permintaanList.isEmpty()) {
+            System.out.println("Tidak ada data permintaan ditemukan!");
+        } else {
+            System.out.println("Retrieved " + permintaanList.size() + " permintaan records.");
+            for (PermintaanPenjemputan permintaan : permintaanList) {
+                System.out.println("Permintaan ID: " + permintaan.getIdPermintaan() + ", Nama Pelanggan: " + permintaan.getNamaPelanggan() + ", Alamat: " + permintaan.getAlamat());
+            }
+        }
+        
+        System.out.println("=== PermintaanPenjemputanController.getAllPermintaan END ===");
         return permintaanList;
     }
+    
 
     public PermintaanPenjemputan getPermintaanById(int id) {
         logger.debug("Fetching permintaan with ID: {}", id);

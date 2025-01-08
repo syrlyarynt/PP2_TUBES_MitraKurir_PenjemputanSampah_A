@@ -17,31 +17,23 @@ public class LokasiDropboxService {
     }
 
     public List<LokasiDropbox> getAllDropbox() {
-        System.out.println("=== LokasiDropboxService.getAllDropbox() START ===");
-        try {
-            System.out.println("Executing SQL: SELECT * FROM lokasi_dropbox");
-            List<LokasiDropbox> dropboxes = mapper.getAllDropbox();
-            System.out.println("Query executed successfully");
-
-            if (dropboxes != null) {
-                System.out.println("Retrieved " + dropboxes.size() + " records");
-                if (!dropboxes.isEmpty()) {
-                    LokasiDropbox first = dropboxes.get(0);
-                    System.out.println("First record - ID: " + first.getId() + ", Nama Dropbox: " + first.getNamaDropbox());
-                }
-            } else {
-                System.out.println("Retrieved null list");
+        System.out.println("=== LokasiDropboxController.getAllDropbox START ===");
+        sqlSession.clearCache();
+        List<LokasiDropbox> dropboxes = mapper.getAllDropbox();
+        
+        if (dropboxes == null || dropboxes.isEmpty()) {
+            System.out.println("Tidak ada data dropbox ditemukan!");
+        } else {
+            System.out.println("Retrieved " + dropboxes.size() + " dropbox records.");
+            for (LokasiDropbox dropbox : dropboxes) {
+                System.out.println("Dropbox ID: " + dropbox.getId() + ", Name: " + dropbox.getNamaDropbox());
             }
-
-            return dropboxes;
-        } catch (Exception e) {
-            System.out.println("ERROR in getAllDropbox: " + e.getMessage());
-            e.printStackTrace();
-            return new ArrayList<>();
-        } finally {
-            System.out.println("=== LokasiDropboxService.getAllDropbox() END ===");
         }
+        
+        System.out.println("=== LokasiDropboxController.getAllDropbox END ===");
+        return dropboxes;
     }
+    
 
     public LokasiDropbox getDropboxById(int id) {
         System.out.println("=== LokasiDropboxService.getDropboxById() START ===");
@@ -66,10 +58,27 @@ public class LokasiDropboxService {
     public void createDropbox(LokasiDropbox dropbox) {
         System.out.println("=== LokasiDropboxService.createDropbox() START ===");
         try {
+            // Menampilkan log untuk memeriksa data sebelum disimpan
             System.out.println("Inserting Dropbox: " + dropbox);
+            
+            // Menyisipkan data dropbox ke database
             mapper.insertDropbox(dropbox);
+            
+            // Melakukan commit untuk memastikan data tersimpan
             sqlSession.commit();
+
+            sqlSession.flushStatements();
+            
+            // Membersihkan cache untuk memastikan data terbaru diambil
+            sqlSession.clearCache(); 
+            
+            // Menampilkan ID setelah data berhasil dimasukkan
             System.out.println("Dropbox inserted successfully with ID: " + dropbox.getId());
+            
+            // Fetch dan tampilkan semua dropbox untuk memastikan data terbaru ada
+            List<LokasiDropbox> dropboxes = mapper.getAllDropbox();
+            dropboxes.forEach(d -> System.out.println("Dropbox ID: " + d.getId() + ", Name: " + d.getNamaDropbox()));
+            
         } catch (Exception e) {
             System.out.println("ERROR in createDropbox: " + e.getMessage());
             e.printStackTrace();
@@ -77,6 +86,9 @@ public class LokasiDropboxService {
             System.out.println("=== LokasiDropboxService.createDropbox() END ===");
         }
     }
+    
+    
+    
 
     public void updateDropbox(LokasiDropbox dropbox) {
         System.out.println("=== LokasiDropboxService.updateDropbox() START ===");

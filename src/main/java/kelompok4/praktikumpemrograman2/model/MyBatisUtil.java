@@ -27,6 +27,6 @@ public class MyBatisUtil {
 
     public static SqlSession getSqlSession() {
         System.out.println("Getting new SQL session...");
-        return sqlSessionFactory.openSession();
+        return sqlSessionFactory.openSession(true);
     }
 }
