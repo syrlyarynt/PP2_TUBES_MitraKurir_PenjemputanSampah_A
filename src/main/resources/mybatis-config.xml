@@ -9,7 +9,6 @@
             <dataSource type="POOLED">
                 <property name="driver" value="com.mysql.cj.jdbc.Driver" />
                 <property name="url" value="jdbc:mysql://localhost:3306/kelompok4_penjemputansampah" />
-
                 <property name="username" value="root" />
                 <property name="password" value="" />
             </dataSource>
@@ -22,6 +21,9 @@
         <mapper class="kelompok4.praktikumpemrograman2.model.JenisKategoriMapper"></mapper>
         <mapper class="kelompok4.praktikumpemrograman2.model.LokasiDropboxMapper"></mapper>
         <mapper class="kelompok4.praktikumpemrograman2.model.PermintaanPenjemputanMapper"></mapper>
+        <mapper class="kelompok4.praktikumpemrograman2.model.DropboxRateMapper"/>
+        <mapper class="kelompok4.praktikumpemrograman2.model.PickupAssignmentMapper"/>
+        <mapper class="kelompok4.praktikumpemrograman2.model.TotalSampahMapper"/>
 
     </mappers>
 </configuration>

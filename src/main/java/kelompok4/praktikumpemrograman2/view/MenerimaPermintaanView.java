@@ -1,34 +1,76 @@
 package kelompok4.praktikumpemrograman2.view;
 
+import kelompok4.praktikumpemrograman2.controller.HistoryController;
+import kelompok4.praktikumpemrograman2.controller.MenerimaPermintaanController;
+import kelompok4.praktikumpemrograman2.controller.PermintaanPenjemputanController;
+import kelompok4.praktikumpemrograman2.controller.PickupAssignmentController;
+import kelompok4.praktikumpemrograman2.model.History;
+import kelompok4.praktikumpemrograman2.model.PickupAssignment;
+import kelompok4.praktikumpemrograman2.model.LokasiDropbox;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
-import java.util.List;
-
-import org.apache.ibatis.session.SqlSession;
-import kelompok4.praktikumpemrograman2.model.LokasiDropbox;
-import kelompok4.praktikumpemrograman2.model.LokasiDropboxMapper;
-import kelompok4.praktikumpemrograman2.model.MyBatisUtil;
-
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
+import java.time.LocalDateTime;
+import java.util.List;
 
 public class MenerimaPermintaanView extends JFrame {
-    private JPanel Panel;
+    private final JPanel Panel;
     private JTable pickupTable;
-    private JTable secondTable;
-    private DefaultTableModel tableModel;
-    private DefaultTableModel secondTableModel;
-
+    private JTable dropboxTable;
+    private DefaultTableModel pickupTableModel;
+    private DefaultTableModel dropboxTableModel;
+    private final MenerimaPermintaanController controller;
+    private LokasiDropbox selectedDropbox;
+    private JButton terimaButton;
+    private JButton tolakButton;
+    private JButton refreshButton;
+    private List<PickupAssignment> pendingAssignments;
+    // Constructor untuk tab panel
     public MenerimaPermintaanView() {
-        setTitle("Permintaan Pickup");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        // Panel utama dengan BorderLayout
+        this.controller = new MenerimaPermintaanController();
         Panel = new JPanel(new BorderLayout());
+
+        // Get the first pending assignment and set it as current
+        pendingAssignments = controller.getPendingPickups();
+        if (!pendingAssignments.isEmpty()) {
+            PickupAssignment firstPending = pendingAssignments.get(0);
+            controller.setCurrentAssignment(firstPending);
+        }
+
+        initializeUI();
+        loadAllPendingPickups();
+    }
+
+
+    // Constructor untuk window popup dengan assignment
+    public MenerimaPermintaanView(PickupAssignment assignment) {
+        this.controller = new MenerimaPermintaanController();
+        this.controller.setCurrentAssignment(assignment);
+        Panel = new JPanel(new BorderLayout());
+        initializeUI();
+        loadSpecificPickup();
+    }
+
+
+    private void initializeUI() {
+        setTitle("Permintaan Pickup");
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
         Panel.setBackground(new Color(255, 250, 240));
 
-        // Header Panel
+        setupHeaderPanel();
+        setupTablesPanel();
+        setupButtonPanel();
+
+        setContentPane(Panel);
+        setPreferredSize(new Dimension(800, 600));
+        pack();
+        setLocationRelativeTo(null);
+    }
+
+    private void setupHeaderPanel() {
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(new Color(255, 250, 240));
 
@@ -43,23 +85,32 @@ public class MenerimaPermintaanView extends JFrame {
 
         headerPanel.add(titleWrapperPanel, BorderLayout.CENTER);
         Panel.add(headerPanel, BorderLayout.NORTH);
+    }
 
-        // Panel untuk tabel (keduanya vertikal)
+    private void setupTablesPanel() {
         JPanel tablePanel = new JPanel();
         tablePanel.setLayout(new BoxLayout(tablePanel, BoxLayout.Y_AXIS));
         tablePanel.setBackground(new Color(255, 250, 240));
 
+        setupPickupTable(tablePanel);
+        setupDropboxTable(tablePanel);
+
+        Panel.add(tablePanel, BorderLayout.CENTER);
+    }
+
+    private void setupPickupTable(JPanel tablePanel) {
         String[] columnNames = {"Nama", "Alamat", "Berat(kg)", "Harga"};
-        tableModel = new DefaultTableModel(columnNames, 0);
-        pickupTable = createCustomTable(tableModel);
+        pickupTableModel = new DefaultTableModel(columnNames, 0);
+        pickupTable = createCustomTable(pickupTableModel);
 
         JScrollPane tableScrollPane = new JScrollPane(pickupTable);
         tableScrollPane.setPreferredSize(new Dimension(400, 150));
         tableScrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
         tablePanel.add(Box.createVerticalStrut(10));
         tablePanel.add(tableScrollPane);
+    }
 
-        // Tabel kedua
+    private void setupDropboxTable(JPanel tablePanel) {
         JLabel lblDropbox = new JLabel("Lokasi Dropbox", SwingConstants.LEFT);
         lblDropbox.setFont(new Font("SansSerif", Font.BOLD, 14));
         lblDropbox.setForeground(new Color(139, 0, 0));
@@ -67,90 +118,270 @@ public class MenerimaPermintaanView extends JFrame {
         tablePanel.add(Box.createVerticalStrut(10));
         tablePanel.add(lblDropbox);
 
-        String[] secondColumnNames = {"Nama Dropbox", "Alamat", "Jarak"};
-        secondTableModel = new DefaultTableModel(secondColumnNames, 0);
-        secondTable = createCustomTable(secondTableModel);
+        String[] columnNames = {"Nama Dropbox", "Alamat", "Jarak", "Kapasitas Tersedia"};
+        dropboxTableModel = new DefaultTableModel(columnNames, 0);
+        dropboxTable = createCustomTable(dropboxTableModel);
 
-        JScrollPane secondTableScrollPane = new JScrollPane(secondTable);
-        secondTableScrollPane.setPreferredSize(new Dimension(400, 150));
-        secondTableScrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
+        dropboxTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int selectedRow = dropboxTable.getSelectedRow();
+                if (selectedRow >= 0) {
+                    Object namaDropbox = dropboxTable.getValueAt(selectedRow, 0);
+                    List<LokasiDropbox> dropboxList = controller.getDropboxController().getAllDropbox();
+                    selectedDropbox = dropboxList.stream()
+                            .filter(d -> d.getNamaDropbox().equals(namaDropbox))
+                            .findFirst()
+                            .orElse(null);
+                }
+            }
+        });
+
+        JScrollPane tableScrollPane = new JScrollPane(dropboxTable);
+        tableScrollPane.setPreferredSize(new Dimension(400, 150));
+        tableScrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
         tablePanel.add(Box.createVerticalStrut(10));
-        tablePanel.add(secondTableScrollPane);
+        tablePanel.add(tableScrollPane);
+    }
 
-        Panel.add(tablePanel, BorderLayout.CENTER);
-
-        // Panel untuk tombol
+    private void setupButtonPanel() {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JButton terimaButton = new JButton("Terima");
+
+        terimaButton = new JButton("Terima");
         terimaButton.setBackground(new Color(34, 139, 34));
         terimaButton.setForeground(Color.WHITE);
+        terimaButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+        terimaButton.addActionListener(e -> handleTerima());
 
-        JButton tolakButton = new JButton("Tolak");
+        tolakButton = new JButton("Tolak");
         tolakButton.setBackground(new Color(255, 160, 122));
         tolakButton.setForeground(Color.WHITE);
+        tolakButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+        tolakButton.addActionListener(e -> handleTolak());
 
+        // Tombol Refresh
+        refreshButton = new JButton("Refresh");
+        refreshButton.setBackground(new Color(70, 130, 180)); // Warna biru tema
+        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        // Always add buttons but enable/disable based on assignment
         buttonPanel.add(terimaButton);
         buttonPanel.add(tolakButton);
+        buttonPanel.add(refreshButton);
+        refreshButton.addActionListener(e->handleRefresh());
+        // Enable/disable based on assignment
+        boolean hasAssignment = controller.hasActiveAssignment();
+        terimaButton.setEnabled(hasAssignment);
+        tolakButton.setEnabled(hasAssignment);
+
         Panel.add(buttonPanel, BorderLayout.SOUTH);
+    }
+    private void handleRefresh(){
+        PickupAssignmentController pickupController = new PickupAssignmentController();
+        pendingAssignments = pickupController.getAssignmentsByStatus("Assigned");
+        pickupTableModel.setRowCount(0);
 
-        setContentPane(Panel);
-        setPreferredSize(new Dimension(800, 600));
-        pack();
-        setLocationRelativeTo(null);
+        for (PickupAssignment assignment : pendingAssignments) {
+            if (assignment != null && assignment.getPermintaan() != null) {
+                Object[] row = {
+                        assignment.getPermintaan().getNamaPelanggan(),
+                        assignment.getPermintaan().getAlamat(),
+                        assignment.getTotalWeight().toString(),
+                        assignment.getTotalCost().toString()
+                };
+                pickupTableModel.addRow(row);
 
-       // String[][] dataDummy = {
-       //     {"John Doe", "Jl. Merdeka No. 1", "3 Kg", "Rp 50.000"},
-       // };
-       // setPickupData(dataDummy);
-
-       // String[][] secondDataDummy = {
-       //     {"Dropbox Cipedes", "Jl.Setiabudi Regency", "1.8 KM"},
-       //     {"Dropbox Gegerkalong", "Jl.Gegerkalong Hilir", "2.3 KM"},
-       //     {"Dropbox Ledeng", "Jl.Setiabudi", "5.0 KM"},
-       // };
-       // setSecondTableData(secondDataDummy);
-        
-      //Mengambil data dari database menggunakan MyBatis
-        String[][] secondData = getLokasiDropboxData();
-        setSecondTableData(secondData);
-     }
-     
-    private String[][] getLokasiDropboxData() {
-        SqlSession session = MyBatisUtil.getSqlSession();
-        try {
-            LokasiDropboxMapper mapper = session.getMapper(LokasiDropboxMapper.class);
-            // Correct List from java.util
-            List<LokasiDropbox> records = mapper.getAllDropbox();
-            String[][] data = new String[records.size()][3];
-
-            int i = 0;
-            for (LokasiDropbox entity : records) {
-                data[i][0] = entity.getNamaDropbox();
-                data[i][1] = entity.getAlamat();
-                data[i][2] = String.format("%.1f KM", entity.getJarak());
-                i++;
+                // Set this as current assignment if none is set
+                if (!controller.hasActiveAssignment()) {
+                    controller.setCurrentAssignment(assignment);
+                }
             }
+        }
+        loadDropboxLocations();
 
-            return data;
-        } finally {
-            session.close();
+        // Update button states
+        enableButtons(controller.hasActiveAssignment());
+    }
+    public void enableButtons(boolean enable) {
+        if (terimaButton != null) terimaButton.setEnabled(enable);
+        if (tolakButton != null) tolakButton.setEnabled(enable);
+    }
+
+    public JButton getTerimaButton() {
+        return terimaButton;
+    }
+
+    public JButton getTolakButton() {
+        return tolakButton;
+    }
+    private void loadAllPendingPickups() {
+
+        List<PickupAssignment> pendingAssignments = controller.getPendingPickups();
+        pickupTableModel.setRowCount(0);
+
+        for (PickupAssignment assignment : pendingAssignments) {
+            if (assignment != null && assignment.getPermintaan() != null) {
+                Object[] row = {
+                        assignment.getPermintaan().getNamaPelanggan(),
+                        assignment.getPermintaan().getAlamat(),
+                        assignment.getTotalWeight().toString(),
+                        assignment.getTotalCost().toString()
+                };
+                pickupTableModel.addRow(row);
+
+                // Set this as current assignment if none is set
+                if (!controller.hasActiveAssignment()) {
+                    controller.setCurrentAssignment(assignment);
+                }
+            }
+        }
+        loadDropboxLocations();
+
+        // Update button states
+        enableButtons(controller.hasActiveAssignment());
+    }
+    private void loadSpecificPickup() {
+        PickupAssignment assignment = controller.getCurrentAssignment();
+        if (assignment != null && assignment.getPermintaan() != null) {
+            Object[] row = {
+                    assignment.getPermintaan().getNamaPelanggan(),
+                    assignment.getPermintaan().getAlamat(),
+                    assignment.getTotalWeight().toString(),
+                    assignment.getTotalCost().toString()
+            };
+            pickupTableModel.setRowCount(0);
+            pickupTableModel.addRow(row);
+        }
+        loadDropboxLocations();
+    }
+
+    private void loadDropboxLocations() {
+        Object[][] dropboxData = controller.getDropboxTableData();
+        dropboxTableModel.setRowCount(0);
+
+        for (Object[] row : dropboxData) {
+            dropboxTableModel.addRow(row);
         }
     }
 
+    private void handleTerima() {
+        if (!controller.hasActiveAssignment()) {
+            JOptionPane.showMessageDialog(this,
+                    "Tidak ada permintaan yang dipilih.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        int index = pickupTable.getSelectedRow();
+        PickupAssignment assignment = pendingAssignments.get(index);
+        controller.setCurrentAssignment(assignment);
+        LokasiDropbox dropbox = selectedDropbox != null ? selectedDropbox : assignment.getDropbox();
 
-    public void setPickupData(String[][] data) {
-        tableModel.setRowCount(0);
-        for (String[] row : data) {
-            tableModel.addRow(row);
+        if (dropbox == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Silakan pilih lokasi dropbox terlebih dahulu.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (controller.terimaPermintaan(dropbox)) {
+            try {
+                History history = new History();
+                history.setPickupAssignmentId(assignment.getId());
+                history.setWaktuSelesai(LocalDateTime.now());
+                history.setLokasi(dropbox.getNamaDropbox());
+                // Set kategoriSampahId instead of kategoriSampah string
+                history.setKategoriSampah(assignment.getPermintaan().getKategoriSampahId());
+                history.setBeratSampah(assignment.getTotalWeight());
+                history.setHarga(assignment.getTotalCost());
+                history.setStatusPenyelesaian("Diterima");
+
+                HistoryController historyController = new HistoryController();
+                historyController.insertHistory(history);
+
+                JOptionPane.showMessageDialog(this,
+                        "Permintaan pickup telah diterima dan akan segera diproses.",
+                        "Sukses",
+                        JOptionPane.INFORMATION_MESSAGE);
+                dispose();
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this,
+                        "Gagal menyimpan ke history: " + e.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this,
+                    "Gagal memproses permintaan.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    public void setSecondTableData(String[][] data) {
-        secondTableModel.setRowCount(0);
-        for (String[] row : data) {
-            secondTableModel.addRow(row);
+    private void handleTolak() {
+        if (!controller.hasActiveAssignment()) {
+            JOptionPane.showMessageDialog(this,
+                    "Tidak ada permintaan yang dipilih.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String reason = JOptionPane.showInputDialog(this,
+                "Masukkan alasan penolakan:",
+                "Alasan Penolakan",
+                JOptionPane.QUESTION_MESSAGE);
+
+        if (reason != null && !reason.trim().isEmpty()) {
+            try {
+                PickupAssignment assignment = controller.getCurrentAssignment();
+
+                // Update the status of the assignment to "Rejected"
+                PickupAssignmentController pickupController = new PickupAssignmentController();
+                boolean updated = pickupController.updateAssignmentStatus(assignment.getId(), "Rejected - " + reason);
+
+                if (updated) {
+                    // Optionally, add a history entry to record the rejection reason
+                    History history = new History();
+                    history.setPickupAssignmentId(assignment.getId());
+                    history.setWaktuSelesai(LocalDateTime.now());
+                    history.setLokasi(assignment.getDropbox().getNamaDropbox());
+                    history.setKategoriSampah(assignment.getPermintaan().getKategoriSampahId());
+                    history.setBeratSampah(assignment.getTotalWeight());
+                    history.setHarga(assignment.getTotalCost());
+                    history.setStatusPenyelesaian("Ditolak - " + reason);
+
+                    HistoryController historyController = new HistoryController();
+                    historyController.insertHistory(history);
+
+                    JOptionPane.showMessageDialog(this,
+                            "Permintaan pickup telah ditolak dan status diperbarui.",
+                            "Sukses",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Gagal memperbarui status permintaan.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this,
+                        "Gagal memproses penolakan: " + e.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this,
+                    "Alasan penolakan harus diisi.",
+                    "Peringatan",
+                    JOptionPane.WARNING_MESSAGE);
         }
     }
+
 
     private JTable createCustomTable(DefaultTableModel model) {
         JTable table = new JTable(model) {
@@ -177,7 +408,22 @@ public class MenerimaPermintaanView extends JFrame {
         table.getTableHeader().setBackground(new Color(255, 160, 122));
         table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 10));
         table.getTableHeader().setForeground(Color.WHITE);
+
         return table;
+    }
+
+    public void setPickupData(String[][] data) {
+        pickupTableModel.setRowCount(0);
+        for (String[] row : data) {
+            pickupTableModel.addRow(row);
+        }
+    }
+
+    public void setDropboxData(String[][] data) {
+        dropboxTableModel.setRowCount(0);
+        for (String[] row : data) {
+            dropboxTableModel.addRow(row);
+        }
     }
 
     public JPanel getPanel() {

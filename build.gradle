@@ -12,15 +12,30 @@ repositories {
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    // https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
+
+    // MySQL Connector
     implementation 'com.mysql:mysql-connector-j:9.1.0'
-// https://mvnrepository.com/artifact/com.miglayout/miglayout
+    
+    // MigLayout
     implementation 'com.miglayout:miglayout-swing:11.4.2'
-// https://mvnrepository.com/artifact/org.mybatis/mybatis
+
+    // MyBatis
     implementation 'org.mybatis:mybatis:3.5.17'
+<<<<<<< HEAD
+=======
+
+    // FlatLaf
+>>>>>>> dev
     implementation 'com.formdev:flatlaf:3.5.4'
     implementation 'com.formdev:flatlaf-intellij-themes:3.5.4'
 
+    // SLF4J API dan Implementasi (Hanya satu versi yang digunakan)
+    implementation 'org.slf4j:slf4j-api:2.0.16'
+    implementation 'org.slf4j:slf4j-simple:2.0.16'  // Hapus versi yang lain
+
+    // Logback
+    implementation 'ch.qos.logback:logback-classic:1.4.7'
+    implementation 'ch.qos.logback:logback-core:1.4.7'
 }
 
 test {
