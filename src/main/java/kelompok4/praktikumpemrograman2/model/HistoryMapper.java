@@ -5,7 +5,7 @@ import java.util.List;
 
 public interface HistoryMapper {
     @Select("SELECT h.*, pa.* FROM history h " +
-            "LEFT JOIN pickup_assignments pa ON h.pickup_assignment_id = pa.id")
+            "LEFT OUTER JOIN pickup_assignments pa ON h.pickup_assignment_id = pa.id")
     @Results(id = "historyResultMap", value = {
             @Result(property = "idRiwayat", column = "idRiwayat"),
             @Result(property = "waktuSelesai", column = "waktuSelesai"),

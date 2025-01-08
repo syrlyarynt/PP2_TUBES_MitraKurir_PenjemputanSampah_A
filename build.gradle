@@ -1,3 +1,4 @@
+
 plugins {
     id 'java'
 }
@@ -21,11 +22,8 @@ dependencies {
 
     // MyBatis
     implementation 'org.mybatis:mybatis:3.5.17'
-<<<<<<< HEAD
-=======
 
     // FlatLaf
->>>>>>> dev
     implementation 'com.formdev:flatlaf:3.5.4'
     implementation 'com.formdev:flatlaf-intellij-themes:3.5.4'
 

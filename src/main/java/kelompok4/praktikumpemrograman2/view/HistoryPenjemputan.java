@@ -65,12 +65,17 @@ public class HistoryPenjemputan {
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.EAST;
         bottomPanel.add(totalLabel, gbc);
-
+        JButton refreshButton = new JButton("Refresh");
+        refreshButton.setFont(new Font("SansSerif",Font.BOLD,14));
+        bottomPanel.add(refreshButton);
+        refreshButton.addActionListener(e->actionRefresh());
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
-
+        
         return mainPanel;
     }
-
+    private void actionRefresh(){
+        updateTableData();
+    }
 //    private void setupTableProperties() {
 //        table.setBackground(new Color(255, 239, 213));
 //        table.setForeground(Color.BLACK);

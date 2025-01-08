@@ -24,7 +24,7 @@ public class HistoryService {
             HistoryMapper mapper = sqlSession.getMapper(HistoryMapper.class);
             System.out.println("Mapper created successfully");
 
-            System.out.println("Executing SQL: SELECT * FROM permintaanpenjemputan");
+            System.out.println("Executing SQL: SELECT * FROM history");
             List<History> histories = mapper.getAllHistory();
 
             System.out.println("Query executed successfully");
