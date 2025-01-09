@@ -6,15 +6,18 @@ import kelompok4.praktikumpemrograman2.model.LokasiDropbox;
 import org.apache.ibatis.session.SqlSession;
 import kelompok4.praktikumpemrograman2.model.MyBatisUtil;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class MenerimaPermintaanController {
     private final PickupAssignmentController pickupController;
     private final LokasiDropboxController dropboxController;
+    private final PermintaanPenjemputanController permintaanController;
     private PermintaanPenjemputan currentPermintaan;
     private PickupAssignment currentAssignment;
 
     public MenerimaPermintaanController() {
         this.pickupController = new PickupAssignmentController();
+        this.permintaanController = new PermintaanPenjemputanController();
         this.dropboxController = new LokasiDropboxController();
     }
 
@@ -29,15 +32,18 @@ public class MenerimaPermintaanController {
 
     // Method untuk mendapatkan data pickup yang akan ditampilkan
     public Object[][] getPickupTableData() {
-        if (currentPermintaan != null) {
-            return new Object[][] {{
-                    currentPermintaan.getNamaPelanggan(),
-                    currentPermintaan.getAlamat(),
-                    currentPermintaan.getBerat().toString(),
-                    currentPermintaan.getHarga() != null ? currentPermintaan.getHarga().toString() : "0"
-            }};
-        }
-        return new Object[][] {};
+        // Mengambil data permintaan yang terbaru
+        List<PermintaanPenjemputan> permintaanList = permintaanController.getAllPermintaan();
+        
+        // Mengonversi data permintaan menjadi format yang cocok untuk tabel
+        return permintaanList.stream()
+                .map(permintaan -> new Object[] {
+                        permintaan.getNamaPelanggan(),
+                        permintaan.getAlamat(),
+                        permintaan.getBerat().toString(),
+                        permintaan.getHarga() != null ? permintaan.getHarga().toString() : "0"
+                })
+                .toArray(Object[][]::new);
     }
 
     // Method untuk mendapatkan data dropbox

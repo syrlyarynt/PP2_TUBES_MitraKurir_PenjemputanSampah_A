@@ -7,6 +7,8 @@ import kelompok4.praktikumpemrograman2.controller.PickupAssignmentController;
 import kelompok4.praktikumpemrograman2.model.History;
 import kelompok4.praktikumpemrograman2.model.PickupAssignment;
 import kelompok4.praktikumpemrograman2.model.LokasiDropbox;
+import kelompok4.praktikumpemrograman2.model.PermintaanPenjemputan;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -163,6 +165,7 @@ public class MenerimaPermintaanView extends JFrame {
         refreshButton.setBackground(new Color(70, 130, 180)); // Warna biru tema
         refreshButton.setForeground(Color.WHITE);
         refreshButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+        refreshButton.addActionListener(e -> handleRefresh());
 
         // Always add buttons but enable/disable based on assignment
         buttonPanel.add(terimaButton);
@@ -354,6 +357,40 @@ public class MenerimaPermintaanView extends JFrame {
                     JOptionPane.WARNING_MESSAGE);
         }
     }
+
+    private void handleRefresh() {
+        System.out.println("=== MenerimaPermintaanController.refreshTables START ===");
+    
+        // Ambil data permintaan terbaru melalui controller
+        Object[][] updatedPermintaanData = controller.getPickupTableData();  // Ganti dengan method yang benar untuk permintaan
+        if (updatedPermintaanData != null && updatedPermintaanData.length > 0) {
+            pickupTableModel.setRowCount(0);  // Hapus baris tabel lama
+            for (Object[] row : updatedPermintaanData) {
+                pickupTableModel.addRow(row); // Menambah baris baru ke tabel
+            }
+        } else {
+            System.err.println("Error: Failed to retrieve updated permintaan data.");
+        }
+    
+        // Ambil data dropbox terbaru dari database
+        Object[][] updatedDropboxData = controller.getDropboxTableData();  // Ganti dengan method yang benar untuk dropbox
+        if (updatedDropboxData != null && updatedDropboxData.length > 0) {
+            dropboxTableModel.setRowCount(0);  // Hapus baris tabel lama
+            for (Object[] row : updatedDropboxData) {
+                dropboxTableModel.addRow(row); // Menambahkan data terbaru ke tabel
+            }
+        } else {
+            System.err.println("Error: Failed to retrieve updated dropbox data.");
+        }
+    
+        // Menampilkan pesan info jika refresh berhasil
+        JOptionPane.showMessageDialog(this, "Tabel telah diperbarui.", "Info", JOptionPane.INFORMATION_MESSAGE);
+    
+        System.out.println("=== MenerimaPermintaanController.handleRefresh END ===");
+    }
+    
+    
+    
 
 
     private JTable createCustomTable(DefaultTableModel model) {
