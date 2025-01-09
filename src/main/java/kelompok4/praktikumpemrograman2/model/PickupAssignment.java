@@ -58,4 +58,18 @@ public class PickupAssignment {
 
     public LokasiDropbox getDropbox() { return dropbox; }
     public void setDropbox(LokasiDropbox dropbox) { this.dropbox = dropbox; }
+
+    @Override
+    public String toString() {
+        return "PickupAssignment{" +
+                "id=" + id +
+                ", permintaan=" + (permintaan != null ? permintaan.getNamaPelanggan() : "null") +
+                ", dropbox=" + (dropbox != null ? dropbox.getNamaDropbox() : "null") +
+                ", totalWeight=" + totalWeight +
+                ", totalCost=" + totalCost +
+                ", status='" + status + '\'' +
+                ", completionDate=" + completionDate +
+                '}';
+    }
+
 }
