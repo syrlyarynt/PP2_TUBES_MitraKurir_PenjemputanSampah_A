@@ -18,42 +18,21 @@ public class HistoryService {
         System.out.println("HistoryService initialized with SqlSession");
     }
 
-    public List<History> getAllHistory() {
+    public List<History> getAllHistory(SqlSession sqlSession) {
         System.out.println("=== HistoryService.getAllHistory() START ===");
         try {
             HistoryMapper mapper = sqlSession.getMapper(HistoryMapper.class);
             System.out.println("Mapper created successfully");
 
-            System.out.println("Executing SQL: SELECT * FROM permintaanpenjemputan");
             List<History> histories = mapper.getAllHistory();
+            System.out.println("Retrieved " + (histories != null ? histories.size() : 0) + " records");
 
-            System.out.println("Query executed successfully");
-            if (histories != null) {
-                System.out.println("Retrieved " + histories.size() + " records");
-                if (!histories.isEmpty()) {
-                    History first = histories.get(0);
-                    System.out.println("First record - ID: " + first.getIdRiwayat()
-                            + ", Status: " + first.getStatusPenyelesaian());
-                }
-            } else {
-                System.out.println("Retrieved null list");
-                histories = new ArrayList<>();
-            }
-
-            return histories;
-
+            return histories != null ? histories : new ArrayList<>();
         } catch (Exception e) {
             System.err.println("ERROR in getAllHistory: " + e.getMessage());
             e.printStackTrace();
             return new ArrayList<>();
-        } finally {
-            System.out.println("=== HistoryService.getAllHistory() END ===");
         }
-    }
-
-    public History getHistoryById(int id) {
-        HistoryMapper mapper = sqlSession.getMapper(HistoryMapper.class);
-        return mapper.getHistoryById(id);
     }
 
     public void insertHistory(History history) {
@@ -61,6 +40,13 @@ public class HistoryService {
         mapper.insertHistory(history);
         sqlSession.commit();
     }
+
+    public History getHistoryById(int id) {
+        HistoryMapper mapper = sqlSession.getMapper(HistoryMapper.class);
+        return mapper.getHistoryById(id);
+    }
+
+
 
     public void updateHistory(History history) {
         HistoryMapper mapper = sqlSession.getMapper(HistoryMapper.class);

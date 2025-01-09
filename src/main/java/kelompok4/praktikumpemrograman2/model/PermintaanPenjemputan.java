@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class PermintaanPenjemputan {
-    private int id;
     private int idPermintaan;
     private String namaPelanggan;
     private String alamat;

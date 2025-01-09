@@ -18,8 +18,8 @@ public class HistoryController {
     }
 
     public List<History> getAllHistory() {
-        try {
-            return historyService.getAllHistory();
+        try (SqlSession sqlSession = MyBatisUtil.getSqlSession()) {
+            return historyService.getAllHistory(sqlSession);
         } catch (Exception e) {
             System.err.println("Error in getAllHistory: " + e.getMessage());
             throw e;

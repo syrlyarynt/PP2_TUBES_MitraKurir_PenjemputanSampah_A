@@ -28,7 +28,8 @@ dependencies {
 
     // SLF4J API dan Implementasi (Hanya satu versi yang digunakan)
     implementation 'org.slf4j:slf4j-api:2.0.16'
-    implementation 'org.slf4j:slf4j-simple:2.0.16'  // Hapus versi yang lain
+// https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+    implementation 'org.slf4j:slf4j-api:2.0.16'
 
     // Logback
     implementation 'ch.qos.logback:logback-classic:1.4.7'

@@ -53,17 +53,31 @@ public class PickupAssignmentController {
     }
 
     public void updateAssignment(PickupAssignment assignment) {
-        try {
+        if (assignment == null) {
+            throw new IllegalArgumentException("Assignment cannot be null");
+        }
+
+        try (SqlSession sqlSession = MyBatisUtil.getSqlSession()) {
+            System.out.println("Fetching existing assignment with ID: " + assignment.getId());
             PickupAssignment existing = service.getAssignmentById(assignment.getId());
+
             if (existing != null) {
+                System.out.println("Validating status transition...");
                 validateStatusTransition(existing.getStatus(), assignment.getStatus());
+            } else {
+                throw new IllegalArgumentException("Assignment with ID " + assignment.getId() + " not found.");
             }
+
+            System.out.println("Updating assignment in the database...");
             service.updateAssignment(assignment);
+
+            System.out.println("Assignment updated successfully: " + assignment);
         } catch (Exception e) {
             System.err.println("Error in updateAssignment: " + e.getMessage());
-            throw e;
+            throw new RuntimeException("Failed to update assignment: " + e.getMessage(), e);
         }
     }
+
 
     public void deleteAssignment(int id) {
         try {

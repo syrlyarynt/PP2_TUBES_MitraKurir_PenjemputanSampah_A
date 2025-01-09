@@ -15,10 +15,13 @@ public class HistoryPenjemputan {
     private final HistoryController historyController;
     private DefaultTableModel tableModel;
     private JTable table;
+    private JButton refreshButton;
+    private JLabel totalLabel;
 
     public HistoryPenjemputan() {
         this.historyController = new HistoryController();
     }
+
 
     public JPanel getPanel() {
         JPanel mainPanel = new JPanel(new BorderLayout());
@@ -28,11 +31,28 @@ public class HistoryPenjemputan {
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(new Color(255, 250, 240));
 
+        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        titlePanel.setBackground(new Color(255, 250, 240));
+
         JLabel titleLabel = new JLabel("History Penjemputan", SwingConstants.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
         titleLabel.setForeground(new Color(139, 0, 0));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
         topPanel.add(titleLabel, BorderLayout.CENTER);
+
+        refreshButton = new JButton("Refresh");
+        refreshButton.setBackground(new Color(70, 130, 180));
+        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+        refreshButton.addActionListener(e -> handleRefresh());
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.setBackground(new Color(255, 250, 240));
+        buttonPanel.add(refreshButton);
+
+        topPanel.add(titlePanel, BorderLayout.CENTER);
+        topPanel.add(buttonPanel, BorderLayout.EAST);
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
 
@@ -53,12 +73,10 @@ public class HistoryPenjemputan {
         JPanel bottomPanel = new JPanel(new GridBagLayout());
         bottomPanel.setBackground(new Color(255, 250, 240));
 
-        updateTableData();
-
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
 
-        JLabel totalLabel = new JLabel("Total Penjemputan: " + tableModel.getRowCount());
+        totalLabel = new JLabel("Total Penjemputan: " + tableModel.getRowCount());
         totalLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
         totalLabel.setForeground(new Color(139, 0, 0));
         gbc.gridx = 0;
@@ -68,42 +86,13 @@ public class HistoryPenjemputan {
 
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
+        // Perbarui data tabel dan label total
+        updateTableData();
+
         return mainPanel;
     }
 
-//    private void setupTableProperties() {
-//        table.setBackground(new Color(255, 239, 213));
-//        table.setForeground(Color.BLACK);
-//        table.setFont(new Font("SansSerif", Font.PLAIN, 14));
-//
-//        // Header styling
-//        table.getTableHeader().setBackground(new Color(255, 160, 122));
-//        table.getTableHeader().setForeground(Color.WHITE);
-//        table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
-//
-//        // Cell renderer for alternating colors and center alignment
-//        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer() {
-//            @Override
-//            public Component getTableCellRendererComponent(JTable table, Object value,
-//                                                           boolean isSelected, boolean hasFocus, int row, int column) {
-//                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-//                if (!isSelected) {
-//                    String status = column == 6 ? (String) table.getValueAt(row, column) : null;
-//                    if ("Belum Selesai".equals(status)) {
-//                        c.setBackground(new Color(255, 200, 200));
-//                    } else {
-//                        c.setBackground(row % 2 == 0 ? new Color(255, 250, 240) : new Color(255, 239, 213));
-//                    }
-//                }
-//                setHorizontalAlignment(SwingConstants.CENTER);
-//                return c;
-//            }
-//        };
-//
-//        for (int i = 0; i < table.getColumnCount(); i++) {
-//            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
-//        }
-//    }
+
 
     private void setupTableProperties() {
         table.setBackground(new Color(255, 239, 213));
@@ -147,23 +136,20 @@ public class HistoryPenjemputan {
         }
     }
 
+
+
+
     private void updateTableData() {
-        System.out.println("\n=== Starting Table Update ===");
         try {
             tableModel.setRowCount(0);
-            System.out.println("Table cleared");
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             List<History> histories = historyController.getAllHistory();
 
-            System.out.println("Processing " + histories.size() + " records for display");
-
             for (History history : histories) {
-                System.out.println("Processing record ID: " + history.getIdRiwayat());
                 Object[] rowData = new Object[]{
                         history.getIdRiwayat(),
                         history.getPickupAssignmentId() != null ? history.getPickupAssignmentId() : "N/A",
-                        history.getWaktuSelesai() != null ? history.getWaktuSelesai().format(formatter) : "N/A",
+                        history.getWaktuSelesai() != null ? history.getWaktuSelesai().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : "N/A",
                         history.getLokasi(),
                         history.getKategoriSampah(),
                         history.getBeratSampah(),
@@ -171,16 +157,34 @@ public class HistoryPenjemputan {
                         history.getStatusPenyelesaian()
                 };
                 tableModel.addRow(rowData);
-                System.out.println("Added row to table: ID=" + history.getIdRiwayat() +
-                        ", Status=" + history.getStatusPenyelesaian());
             }
 
-            System.out.println("Final table row count: " + tableModel.getRowCount());
+            // Update label total
+            totalLabel.setText("Total Penjemputan: " + tableModel.getRowCount());
 
         } catch (Exception e) {
-            System.out.println("ERROR updating table: " + e.getMessage());
             e.printStackTrace();
         }
-        System.out.println("=== Table Update Complete ===\n");
+    }
+    private void handleRefresh() {
+        System.out.println("Refreshing history data...");
+        SwingUtilities.invokeLater(() -> {
+            refreshButton.setEnabled(false);
+            try {
+                updateTableData();
+                JOptionPane.showMessageDialog(null,
+                        "Data berhasil diperbarui",
+                        "Sukses",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception e) {
+                System.err.println("Error refreshing data: " + e.getMessage());
+                JOptionPane.showMessageDialog(null,
+                        "Gagal memperbarui data: " + e.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            } finally {
+                refreshButton.setEnabled(true);
+            }
+        });
     }
 }
