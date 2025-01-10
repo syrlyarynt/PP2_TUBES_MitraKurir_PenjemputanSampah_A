@@ -11,12 +11,12 @@ import java.nio.file.StandardCopyOption;
 import kelompok4.praktikumpemrograman2.controller.JenisKategoriController;
 import kelompok4.praktikumpemrograman2.model.JenisKategori;
 
-public class JenisDanKategori {
+public class JenisDanKategoriView {
     private JPanel panel;
     private JenisKategoriController controller;
     private final String ICON_FOLDER = "src/main/resources/icons/";
 
-    public JenisDanKategori(JenisKategoriController controller) {
+    public JenisDanKategoriView(JenisKategoriController controller) {
         this.controller = controller;
         panel = new JPanel(new BorderLayout());
         JPanel mainPanel = new JPanel(new MigLayout("", "[grow]", "[][][grow][]"));

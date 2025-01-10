@@ -8,18 +8,15 @@ import com.itextpdf.layout.element.Table;
 import kelompok4.praktikumpemrograman2.controller.HistoryController;
 import kelompok4.praktikumpemrograman2.model.History;
 import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.io.FileOutputStream;
-import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.layout.element.Cell;
 
-public class HistoryPenjemputan {
+public class HistoryPenjemputanView {
     private final HistoryController historyController;
     private DefaultTableModel tableModel;
     private JTable table;
@@ -27,7 +24,7 @@ public class HistoryPenjemputan {
     private JButton exportPdfButton;
     private JLabel totalLabel;
 
-    public HistoryPenjemputan() {
+    public HistoryPenjemputanView() {
         this.historyController = new HistoryController();
     }
 
