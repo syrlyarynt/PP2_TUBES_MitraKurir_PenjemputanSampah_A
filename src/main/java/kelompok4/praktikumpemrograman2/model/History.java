@@ -11,8 +11,8 @@ public class History {
     private BigDecimal beratSampah;
     private BigDecimal harga;
     private String statusPenyelesaian;
-    private Integer pickupAssignmentId; // New field
-    private PickupAssignment pickupAssignment; // New relationship
+    private Integer pickupAssignmentId;
+    private PickupAssignment pickupAssignment;
 
     // Getters and Setters
     public int getIdRiwayat() { return idRiwayat; }

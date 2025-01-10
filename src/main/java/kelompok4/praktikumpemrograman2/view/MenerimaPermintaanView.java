@@ -100,8 +100,45 @@ public class MenerimaPermintaanView extends JFrame {
         Panel.add(tablePanel, BorderLayout.CENTER);
     }
 
+//    private void setupPickupTable(JPanel tablePanel) {
+//        String[] columnNames = {"Nama", "Alamat", "Berat(kg)", "Harga", "Status"};  // Tambah kolom Status
+//        pickupTableModel = new DefaultTableModel(columnNames, 0) {
+//            @Override
+//            public boolean isCellEditable(int row, int column) {
+//                return false;
+//            }
+//        };
+//        pickupTable = createCustomTable(pickupTableModel);
+//
+//        // Tambah selection listener
+//        pickupTable.getSelectionModel().addListSelectionListener(e -> {
+//            if (!e.getValueIsAdjusting()) {
+//                int selectedRow = pickupTable.getSelectedRow();
+//                if (selectedRow >= 0) {
+//                    List<PickupAssignment> assignments = controller.getAllAssignments();
+//                    if (selectedRow < assignments.size()) {
+//                        PickupAssignment selectedAssignment = assignments.get(selectedRow);
+//                        controller.setCurrentAssignment(selectedAssignment);
+//
+//                        // Enable button hanya jika status Assigned
+//                        String status = (String) pickupTableModel.getValueAt(selectedRow, 4);
+//                        boolean canAct = status.equals("Assigned");
+//                        enableButtons(canAct);
+//                    }
+//                }
+//            }
+//        });
+//
+//        JScrollPane tableScrollPane = new JScrollPane(pickupTable);
+//        tableScrollPane.setPreferredSize(new Dimension(400, 150));
+//        tableScrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
+//        tablePanel.add(Box.createVerticalStrut(10));
+//        tablePanel.add(tableScrollPane);
+//    }
+
+
     private void setupPickupTable(JPanel tablePanel) {
-        String[] columnNames = {"Nama", "Alamat", "Berat(kg)", "Harga", "Status"};  // Tambah kolom Status
+        String[] columnNames = {"Nama", "Alamat", "Berat(kg)", "Harga", "Status", "Kurir"};  // Tambah kolom Kurir
         pickupTableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -135,6 +172,7 @@ public class MenerimaPermintaanView extends JFrame {
         tablePanel.add(Box.createVerticalStrut(10));
         tablePanel.add(tableScrollPane);
     }
+
 
     private void setupDropboxTable(JPanel tablePanel) {
         JLabel lblDropbox = new JLabel("Lokasi Dropbox", SwingConstants.LEFT);
@@ -216,19 +254,58 @@ public class MenerimaPermintaanView extends JFrame {
     public JButton getTolakButton() {
         return tolakButton;
     }
+//    private void loadAllPendingPickups() {
+//        // Mengambil semua data assignments
+//        List<PickupAssignment> allAssignments = controller.getAllAssignments(); // Ubah ke getAllAssignments()
+//        pickupTableModel.setRowCount(0);
+//
+//        for (PickupAssignment assignment : allAssignments) {
+//            if (assignment != null && assignment.getPermintaan() != null) {
+//                Object[] row = {
+//                        assignment.getPermintaan().getNamaPelanggan(),
+//                        assignment.getPermintaan().getAlamat(),
+//                        assignment.getTotalWeight().toString(),
+//                        assignment.getTotalCost().toString(),
+//                        assignment.getStatus()  // Tambahkan status ke tabel
+//                };
+//                pickupTableModel.addRow(row);
+//
+//                // Set current assignment ke baris pertama jika belum ada yang dipilih
+//                if (!controller.hasActiveAssignment() && assignment.getStatus().equals("Assigned")) {
+//                    controller.setCurrentAssignment(assignment);
+//                }
+//            }
+//        }
+//
+//        loadDropboxLocations();
+//
+//        // Pilih baris pertama dan aktifkan button sesuai status
+//        if (pickupTable.getRowCount() > 0) {
+//            pickupTable.setRowSelectionInterval(0, 0);
+//            String status = (String) pickupTableModel.getValueAt(0, 4); // Ambil status dari kolom ke-4
+//            boolean canAct = status.equals("Assigned");  // Enable hanya untuk status Assigned
+//            enableButtons(canAct);
+//        } else {
+//            enableButtons(false);
+//        }
+//    }
+
     private void loadAllPendingPickups() {
         // Mengambil semua data assignments
-        List<PickupAssignment> allAssignments = controller.getAllAssignments(); // Ubah ke getAllAssignments()
+        List<PickupAssignment> allAssignments = controller.getAllAssignments();
         pickupTableModel.setRowCount(0);
 
         for (PickupAssignment assignment : allAssignments) {
             if (assignment != null && assignment.getPermintaan() != null) {
+                String kurirName = assignment.getKurir() != null ? assignment.getKurir().getNama() : "Belum Ditentukan";
+
                 Object[] row = {
                         assignment.getPermintaan().getNamaPelanggan(),
                         assignment.getPermintaan().getAlamat(),
                         assignment.getTotalWeight().toString(),
                         assignment.getTotalCost().toString(),
-                        assignment.getStatus()  // Tambahkan status ke tabel
+                        assignment.getStatus(),  // Tambahkan status ke tabel
+                        kurirName               // Tambahkan kurir ke tabel
                 };
                 pickupTableModel.addRow(row);
 
@@ -251,6 +328,7 @@ public class MenerimaPermintaanView extends JFrame {
             enableButtons(false);
         }
     }
+
 
     private void loadSpecificPickup() {
         PickupAssignment assignment = controller.getCurrentAssignment();
@@ -394,6 +472,48 @@ public class MenerimaPermintaanView extends JFrame {
 
 
 
+//    private void handleRefresh() {
+//        System.out.println("Memuat ulang data permintaan pickup...");
+//
+//        // Memuat ulang semua data assignments
+//        List<PickupAssignment> allAssignments = controller.getAllAssignments();
+//
+//        // Debug output
+//        allAssignments.forEach(assignment -> System.out.println("Assignment: " + assignment));
+//
+//        // Kosongkan model tabel pickup
+//        pickupTableModel.setRowCount(0);
+//
+//        // Tambahkan data ke tabel pickup
+//        for (PickupAssignment assignment : allAssignments) {
+//            if (assignment != null && assignment.getPermintaan() != null) {
+//                Object[] row = {
+//                        assignment.getPermintaan().getNamaPelanggan(),
+//                        assignment.getPermintaan().getAlamat(),
+//                        assignment.getTotalWeight().toString(),
+//                        assignment.getTotalCost().toString(),
+//                        assignment.getStatus()
+//                };
+//                pickupTableModel.addRow(row);
+//            }
+//        }
+//
+//        // Refresh tampilan tabel
+//        pickupTable.revalidate();
+//        pickupTable.repaint();
+//
+//        // Reset tombol jika tidak ada baris
+//        if (pickupTable.getRowCount() > 0) {
+//            pickupTable.setRowSelectionInterval(0, 0);
+//            updateButtonStates();
+//        } else {
+//            enableButtons(false);
+//        }
+//
+//        // Refresh data dropbox
+//        loadDropboxLocations();
+//    }
+
     private void handleRefresh() {
         System.out.println("Memuat ulang data permintaan pickup...");
 
@@ -409,12 +529,17 @@ public class MenerimaPermintaanView extends JFrame {
         // Tambahkan data ke tabel pickup
         for (PickupAssignment assignment : allAssignments) {
             if (assignment != null && assignment.getPermintaan() != null) {
+                String kurirName = assignment.getKurir() != null ?
+                        assignment.getKurir().getNama() :
+                        "Belum Ditentukan";
+
                 Object[] row = {
                         assignment.getPermintaan().getNamaPelanggan(),
                         assignment.getPermintaan().getAlamat(),
                         assignment.getTotalWeight().toString(),
                         assignment.getTotalCost().toString(),
-                        assignment.getStatus()
+                        assignment.getStatus(),
+                        kurirName  // Menambahkan informasi kurir
                 };
                 pickupTableModel.addRow(row);
             }

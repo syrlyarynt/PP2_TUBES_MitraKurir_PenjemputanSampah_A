@@ -29,15 +29,30 @@ public class PickupAssignmentService {
         }
     }
 
-    public void createAssignment(PickupAssignment assignment) {
+//    public void createAssignment(PickupAssignment assignment) {
+//        try (SqlSession session = MyBatisUtil.getSqlSession()) {
+//            PickupAssignmentMapper localMapper = session.getMapper(PickupAssignmentMapper.class);
+//            localMapper.insertAssignment(assignment);
+//            session.commit();
+//        } catch (Exception e) {
+//            throw e;
+//        }
+//    }
+
+
+
+
+    public void createAssignment(PickupAssignment assignment, int kurirId) {
         try (SqlSession session = MyBatisUtil.getSqlSession()) {
             PickupAssignmentMapper localMapper = session.getMapper(PickupAssignmentMapper.class);
+            assignment.setKurirId(kurirId); // Menentukan kurir
             localMapper.insertAssignment(assignment);
             session.commit();
         } catch (Exception e) {
             throw e;
         }
     }
+
 
     public void updateAssignment(PickupAssignment assignment) {
         try (SqlSession session = MyBatisUtil.getSqlSession()) {

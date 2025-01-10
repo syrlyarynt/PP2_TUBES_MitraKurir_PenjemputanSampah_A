@@ -27,6 +27,21 @@
         }
 
         // Method untuk mendapatkan data pickup yang akan ditampilkan
+//        public Object[][] getPickupTableData() {
+//            List<PickupAssignment> assignments = pickupController.getAllAssignments();
+//            return assignments.stream()
+//                    .filter(assignment -> assignment != null && assignment.getPermintaan() != null)
+//                    .map(assignment -> new Object[] {
+//                            assignment.getPermintaan().getNamaPelanggan(),
+//                            assignment.getPermintaan().getAlamat(),
+//                            assignment.getTotalWeight().toString(),
+//                            assignment.getTotalCost().toString(),
+//                            assignment.getStatus() // Menambahkan status ke data tabel
+//                    })
+//                    .toArray(Object[][]::new);
+//        }
+
+        // Method untuk mendapatkan data pickup yang akan ditampilkan
         public Object[][] getPickupTableData() {
             List<PickupAssignment> assignments = pickupController.getAllAssignments();
             return assignments.stream()
@@ -36,7 +51,10 @@
                             assignment.getPermintaan().getAlamat(),
                             assignment.getTotalWeight().toString(),
                             assignment.getTotalCost().toString(),
-                            assignment.getStatus() // Menambahkan status ke data tabel
+                            assignment.getStatus(),  // Status
+                            assignment.getKurir() != null ?
+                                    assignment.getKurir().getNama() :
+                                    "Belum Ditentukan"   // Nama Kurir
                     })
                     .toArray(Object[][]::new);
         }

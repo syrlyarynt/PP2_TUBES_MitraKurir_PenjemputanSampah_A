@@ -15,9 +15,13 @@ public class PickupAssignment {
     private BigDecimal totalCost;
     private BigDecimal hargaFinal;
     private String notes;
+    private int kurirId;
+    private Kurir kurir;
 
     private PermintaanPenjemputan permintaan;
     private LokasiDropbox dropbox;
+
+
 
     // Getters and Setters
     public int getId() { return id; }
@@ -59,6 +63,14 @@ public class PickupAssignment {
     public LokasiDropbox getDropbox() { return dropbox; }
     public void setDropbox(LokasiDropbox dropbox) { this.dropbox = dropbox; }
 
+
+
+    public int getKurirId() { return kurirId; }
+    public void setKurirId(int kurirId) { this.kurirId = kurirId; }
+
+    public Kurir getKurir() { return kurir; }
+    public void setKurir(Kurir kurir) { this.kurir = kurir; }
+
     @Override
     public String toString() {
         return "PickupAssignment{" +
@@ -69,6 +81,7 @@ public class PickupAssignment {
                 ", totalCost=" + totalCost +
                 ", status='" + status + '\'' +
                 ", completionDate=" + completionDate +
+                ", kurir=" + (kurir != null ? kurir.getNama() : "Belum Ditentukan") +  // Tambahkan nama kurir
                 '}';
     }
 

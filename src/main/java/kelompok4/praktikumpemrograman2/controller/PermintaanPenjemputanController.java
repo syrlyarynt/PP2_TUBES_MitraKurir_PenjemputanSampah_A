@@ -1,11 +1,8 @@
 package kelompok4.praktikumpemrograman2.controller;
 
-import kelompok4.praktikumpemrograman2.model.JenisKategori;
-import kelompok4.praktikumpemrograman2.model.LokasiDropbox;
-import kelompok4.praktikumpemrograman2.model.PermintaanPenjemputan;
+import kelompok4.praktikumpemrograman2.model.*;
 import kelompok4.praktikumpemrograman2.services.PermintaanPenjemputanService;
 import org.apache.ibatis.session.SqlSession;
-import kelompok4.praktikumpemrograman2.model.MyBatisUtil;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -14,11 +11,17 @@ import java.util.List;
 public class PermintaanPenjemputanController {
     private final PermintaanPenjemputanService service;
     private final LokasiDropboxController dropboxController;
+    private final KurirController kurirController;
 
     public PermintaanPenjemputanController() {
         SqlSession sqlSession = MyBatisUtil.getSqlSession();
         this.service = new PermintaanPenjemputanService(sqlSession);
         this.dropboxController = new LokasiDropboxController();
+        this.kurirController = new KurirController();
+    }
+
+    public List<Kurir> getAllKurir() {
+        return kurirController.getAllKurir();
     }
 
     public List<PermintaanPenjemputan> getAllPermintaan() {
