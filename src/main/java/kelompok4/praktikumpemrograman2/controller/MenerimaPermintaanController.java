@@ -142,4 +142,11 @@
         public PickupAssignment getCurrentAssignment() {
             return currentAssignment;
         }
+
+        public boolean markAssignmentAsCompleted(int assignmentId) {
+            PickupAssignmentController pickupAssignmentController = new PickupAssignmentController();
+            return pickupAssignmentController.markAsCompleted(assignmentId);
+        }
+
+
     }

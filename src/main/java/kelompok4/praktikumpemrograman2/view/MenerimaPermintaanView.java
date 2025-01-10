@@ -222,6 +222,15 @@ public class MenerimaPermintaanView extends JFrame {
         tolakButton.setFont(new Font("SansSerif", Font.BOLD, 14));
         tolakButton.addActionListener(e -> handleTolak());
 
+        JButton completeButton = new JButton("Selesaikan");
+        completeButton.setBackground(new Color(60, 179, 113)); // Warna hijau
+        completeButton.setForeground(Color.WHITE);
+        completeButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+        completeButton.addActionListener(e -> handleMarkAsCompleted());
+        buttonPanel.add(completeButton);
+
+
+
         // Tombol Refresh
         refreshButton = new JButton("Refresh");
         refreshButton.setBackground(new Color(70, 130, 180)); // Warna biru tema
@@ -254,41 +263,6 @@ public class MenerimaPermintaanView extends JFrame {
     public JButton getTolakButton() {
         return tolakButton;
     }
-//    private void loadAllPendingPickups() {
-//        // Mengambil semua data assignments
-//        List<PickupAssignment> allAssignments = controller.getAllAssignments(); // Ubah ke getAllAssignments()
-//        pickupTableModel.setRowCount(0);
-//
-//        for (PickupAssignment assignment : allAssignments) {
-//            if (assignment != null && assignment.getPermintaan() != null) {
-//                Object[] row = {
-//                        assignment.getPermintaan().getNamaPelanggan(),
-//                        assignment.getPermintaan().getAlamat(),
-//                        assignment.getTotalWeight().toString(),
-//                        assignment.getTotalCost().toString(),
-//                        assignment.getStatus()  // Tambahkan status ke tabel
-//                };
-//                pickupTableModel.addRow(row);
-//
-//                // Set current assignment ke baris pertama jika belum ada yang dipilih
-//                if (!controller.hasActiveAssignment() && assignment.getStatus().equals("Assigned")) {
-//                    controller.setCurrentAssignment(assignment);
-//                }
-//            }
-//        }
-//
-//        loadDropboxLocations();
-//
-//        // Pilih baris pertama dan aktifkan button sesuai status
-//        if (pickupTable.getRowCount() > 0) {
-//            pickupTable.setRowSelectionInterval(0, 0);
-//            String status = (String) pickupTableModel.getValueAt(0, 4); // Ambil status dari kolom ke-4
-//            boolean canAct = status.equals("Assigned");  // Enable hanya untuk status Assigned
-//            enableButtons(canAct);
-//        } else {
-//            enableButtons(false);
-//        }
-//    }
 
     private void loadAllPendingPickups() {
         // Mengambil semua data assignments
@@ -619,6 +593,27 @@ public class MenerimaPermintaanView extends JFrame {
             dropboxTableModel.addRow(row);
         }
     }
+
+    private void handleMarkAsCompleted() {
+        int selectedRow = pickupTable.getSelectedRow();
+        if (selectedRow >= 0) {
+            // Ambil ID tugas dari baris yang dipilih
+            int assignmentId = controller.getAllAssignments().get(selectedRow).getId();
+
+            // Gunakan metode baru dari MenerimaPermintaanController
+            boolean success = controller.markAssignmentAsCompleted(assignmentId);
+
+            if (success) {
+                JOptionPane.showMessageDialog(this, "Tugas berhasil diselesaikan.");
+                handleRefresh(); // Refresh data setelah tugas selesai
+            } else {
+                JOptionPane.showMessageDialog(this, "Gagal menyelesaikan tugas.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Pilih tugas yang ingin diselesaikan.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
 
     public JPanel getPanel() {
         return Panel;
