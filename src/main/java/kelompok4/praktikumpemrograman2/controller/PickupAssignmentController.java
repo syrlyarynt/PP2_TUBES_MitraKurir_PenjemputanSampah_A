@@ -250,4 +250,28 @@ public class PickupAssignmentController {
             return false;
         }
     }
+
+    public boolean markAsCompleted(int assignmentId) {
+        try {
+            // Ambil tugas berdasarkan ID
+            PickupAssignment assignment = service.getAssignmentById(assignmentId);
+            if (assignment == null || !"In Progress".equals(assignment.getStatus())) {
+                throw new IllegalArgumentException("Tugas tidak valid atau status bukan 'In Progress'.");
+            }
+
+            // Ubah status tugas menjadi "Completed"
+            assignment.setStatus("Completed");
+            assignment.setCompletionDate(LocalDateTime.now());
+            service.updateAssignment(assignment);
+
+            // Ubah status kurir menjadi "Available"
+            updateCourierStatus(assignment.getKurirId(), "Available");
+
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error marking assignment as completed: " + e.getMessage());
+            return false;
+        }
+    }
+
 }
