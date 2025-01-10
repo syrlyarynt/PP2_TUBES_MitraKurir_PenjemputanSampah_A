@@ -140,7 +140,7 @@ public class PickupAssignmentController {
 
     private void validateStatusTransition(String currentStatus, String newStatus) {
         boolean isValid = switch (currentStatus) {
-            case "Assigned" -> newStatus.equals("In Progress") || newStatus.equals("Cancelled") || newStatus.startsWith("Rejected");
+            case "Assigned" -> newStatus.equals("In Progress") || newStatus.equals("Cancelled") || newStatus.startsWith("Ditolak");
             case "In Progress" -> newStatus.equals("Completed") || newStatus.equals("Cancelled");
             case "Completed", "Cancelled" -> false; // Final states
             default -> false;
@@ -152,60 +152,7 @@ public class PickupAssignmentController {
         }
     }
 
-//    public boolean completeAssignment(int id, double actualWeight, double finalPrice, String notes) {
-//        try {
-//            PickupAssignment assignment = service.getAssignmentById(id);
-//            if (assignment == null) {
-//                throw new IllegalArgumentException("Assignment not found with id: " + id);
-//            }
-//
-//            // Pastikan tugas sudah memiliki kurir sebelum diselesaikan
-//            if (assignment.getKurirId() == 0) {
-//                throw new IllegalStateException("Cannot complete assignment without a designated courier.");
-//            }
-//
-//            assignment.setStatus("Completed");
-//            assignment.setBeratAktual(new java.math.BigDecimal(actualWeight));
-//            assignment.setHargaFinal(new java.math.BigDecimal(finalPrice));
-//            assignment.setCompletionDate(LocalDateTime.now());
-//            assignment.setNotes(notes);
-//
-//            service.updateAssignment(assignment);
-//            return true;
-//        } catch (Exception e) {
-//            System.err.println("Error completing assignment: " + e.getMessage());
-//            return false;
-//        }
-//    }
-//
-//    public boolean rejectAssignment(int id, String reason) {
-//        try {
-//            PickupAssignment assignment = service.getAssignmentById(id);
-//            if (assignment == null) {
-//                throw new IllegalArgumentException("Assignment not found with id: " + id);
-//            }
-//
-//            assignment.setStatus("Rejected - " + reason);
-//            assignment.setNotes(reason);
-//            service.updateAssignment(assignment);
-//
-//            History history = new History();
-//            history.setPickupAssignmentId(id);
-//            history.setWaktuSelesai(LocalDateTime.now());
-//            history.setLokasi(assignment.getDropbox().getNamaDropbox());
-//            history.setKategoriSampah(assignment.getPermintaan().getKategoriSampahId());
-//            history.setBeratSampah(assignment.getTotalWeight());
-//            history.setHarga(assignment.getTotalCost());
-//            history.setStatusPenyelesaian("Ditolak - " + reason);
-//
-//            historyService.insertHistory(history);
-//
-//            return true;
-//        } catch (Exception e) {
-//            System.err.println("Error rejecting assignment: " + e.getMessage());
-//            return false;
-//        }
-//    }
+
 
     public boolean completeAssignment(int id, double actualWeight, double finalPrice, String notes) {
         try {
@@ -244,7 +191,7 @@ public class PickupAssignmentController {
                 throw new IllegalArgumentException("Assignment not found with id: " + id);
             }
 
-            assignment.setStatus("Rejected - " + reason);
+            assignment.setStatus("Ditolak - " + reason);
             assignment.setNotes(reason);
             service.updateAssignment(assignment);
 

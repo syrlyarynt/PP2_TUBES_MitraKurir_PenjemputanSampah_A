@@ -97,7 +97,7 @@
             try {
                 if (currentAssignment != null && reason != null && !reason.trim().isEmpty()) {
                     if (currentAssignment.getStatus().equals("Assigned")) {
-                        currentAssignment.setStatus("Rejected - " + reason);
+                        currentAssignment.setStatus("Ditolak - " + reason);
                         currentAssignment.setNotes(reason);
                         pickupController.updateAssignment(currentAssignment);
                         return true;

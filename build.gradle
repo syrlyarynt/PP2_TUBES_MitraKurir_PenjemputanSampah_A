@@ -30,6 +30,7 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:2.0.16'
 // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
     implementation 'org.slf4j:slf4j-api:2.0.16'
+    implementation 'com.itextpdf:itext7-core:7.2.5'
 
     // Logback
     implementation 'ch.qos.logback:logback-classic:1.4.7'
