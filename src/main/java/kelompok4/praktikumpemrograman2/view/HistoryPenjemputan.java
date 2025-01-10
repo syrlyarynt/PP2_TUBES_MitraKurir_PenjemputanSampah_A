@@ -1,27 +1,35 @@
 package kelompok4.praktikumpemrograman2.view;
 
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
 import kelompok4.praktikumpemrograman2.controller.HistoryController;
 import kelompok4.praktikumpemrograman2.model.History;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.layout.element.Cell;
 
 public class HistoryPenjemputan {
     private final HistoryController historyController;
     private DefaultTableModel tableModel;
     private JTable table;
     private JButton refreshButton;
+    private JButton exportPdfButton;
     private JLabel totalLabel;
 
     public HistoryPenjemputan() {
         this.historyController = new HistoryController();
     }
-
 
     public JPanel getPanel() {
         JPanel mainPanel = new JPanel(new BorderLayout());
@@ -46,9 +54,16 @@ public class HistoryPenjemputan {
         refreshButton.setFont(new Font("SansSerif", Font.BOLD, 14));
         refreshButton.addActionListener(e -> handleRefresh());
 
+        exportPdfButton = new JButton("Export ke PDF");
+        exportPdfButton.setBackground(new Color(70, 130, 180));
+        exportPdfButton.setForeground(Color.WHITE);
+        exportPdfButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+        exportPdfButton.addActionListener(e -> exportToPDF());
+
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBackground(new Color(255, 250, 240));
         buttonPanel.add(refreshButton);
+        buttonPanel.add(exportPdfButton);
 
         topPanel.add(titlePanel, BorderLayout.CENTER);
         topPanel.add(buttonPanel, BorderLayout.EAST);
@@ -58,7 +73,7 @@ public class HistoryPenjemputan {
 
         // Setup tabel
         String[] columnNames = {
-                "ID Riwayat", "id, pickup assignment", "Waktu Selesai", "Lokasi",
+                "ID Riwayat", "ID Pickup Assignment", "Waktu Selesai", "Lokasi",
                 "Kategori Sampah", "Berat (Kg)", "Harga (Rp)",
                 "Status"
         };
@@ -92,8 +107,6 @@ public class HistoryPenjemputan {
         return mainPanel;
     }
 
-
-
     private void setupTableProperties() {
         table.setBackground(new Color(255, 239, 213));
         table.setForeground(Color.BLACK);
@@ -103,41 +116,7 @@ public class HistoryPenjemputan {
         table.getTableHeader().setBackground(new Color(255, 160, 122));
         table.getTableHeader().setForeground(Color.WHITE);
         table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
-
-        // Custom Cell Renderer
-        DefaultTableCellRenderer customRenderer = new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                                                           boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-                // Format BigDecimal to String
-                if (value instanceof BigDecimal) {
-                    value = ((BigDecimal) value).setScale(2, BigDecimal.ROUND_HALF_UP).toString();
-                    setText((String) value);
-                }
-
-                // Alternate Row Color
-                if (!isSelected) {
-                    String status = column == 7 ? (String) table.getValueAt(row, column) : null; // Status column
-                    if ("Belum Selesai".equals(status)) {
-                        c.setBackground(new Color(255, 200, 200));
-                    } else {
-                        c.setBackground(row % 2 == 0 ? new Color(255, 250, 240) : new Color(255, 239, 213));
-                    }
-                }
-                setHorizontalAlignment(SwingConstants.CENTER);
-                return c;
-            }
-        };
-
-        for (int i = 0; i < table.getColumnCount(); i++) {
-            table.getColumnModel().getColumn(i).setCellRenderer(customRenderer);
-        }
     }
-
-
-
 
     private void updateTableData() {
         try {
@@ -166,8 +145,8 @@ public class HistoryPenjemputan {
             e.printStackTrace();
         }
     }
+
     private void handleRefresh() {
-        System.out.println("Refreshing history data...");
         SwingUtilities.invokeLater(() -> {
             refreshButton.setEnabled(false);
             try {
@@ -177,7 +156,6 @@ public class HistoryPenjemputan {
                         "Sukses",
                         JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception e) {
-                System.err.println("Error refreshing data: " + e.getMessage());
                 JOptionPane.showMessageDialog(null,
                         "Gagal memperbarui data: " + e.getMessage(),
                         "Error",
@@ -187,4 +165,70 @@ public class HistoryPenjemputan {
             }
         });
     }
+
+    private void exportToPDF() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Simpan PDF");
+        int userSelection = fileChooser.showSaveDialog(null);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            try {
+                // Lokasi file yang dipilih pengguna
+                String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+                if (!filePath.endsWith(".pdf")) {
+                    filePath += ".pdf";
+                }
+
+                // Membuat dokumen PDF
+                PdfWriter writer = new PdfWriter(filePath);
+                PdfDocument pdfDocument = new PdfDocument(writer);
+                Document document = new Document(pdfDocument, com.itextpdf.kernel.geom.PageSize.A4);
+                document.setMargins(36, 36, 36, 36); // Margin atas, kanan, bawah, kiri dalam satuan poin
+
+                // Menambahkan font
+                PdfFont font = PdfFontFactory.createFont(com.itextpdf.io.font.constants.StandardFonts.HELVETICA);
+                document.setFont(font);
+
+                // Judul dokumen
+                document.add(new Paragraph("History Penjemputan")
+                        .setFont(font)
+                        .setFontSize(16)
+                        .setBold()
+                        .setTextAlignment(com.itextpdf.layout.properties.TextAlignment.CENTER));
+
+                // Menambahkan tabel ke PDF
+                Table table = new Table(new float[]{1, 1, 1, 1, 1, 1, 1, 1});
+                table.setWidth(com.itextpdf.layout.properties.UnitValue.createPercentValue(100));
+
+                // Header tabel
+                String[] columnNames = {
+                        "ID Riwayat", "ID Pickup Assignment", "Waktu Selesai", "Lokasi",
+                        "Kategori Sampah", "Berat (Kg)", "Harga (Rp)", "Status"
+                };
+
+                for (String columnName : columnNames) {
+                    table.addHeaderCell(new Cell().add(new Paragraph(columnName).setFont(font).setBold()));
+                }
+
+                // Data tabel
+                for (int i = 0; i < tableModel.getRowCount(); i++) {
+                    for (int j = 0; j < tableModel.getColumnCount(); j++) {
+                        Object value = tableModel.getValueAt(i, j);
+                        table.addCell(new Cell().add(new Paragraph(value != null ? value.toString() : "").setFont(font)));
+                    }
+                }
+
+                document.add(table);
+                document.close();
+
+                JOptionPane.showMessageDialog(null, "Data berhasil diekspor ke PDF!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Gagal mengekspor data ke PDF: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+
 }

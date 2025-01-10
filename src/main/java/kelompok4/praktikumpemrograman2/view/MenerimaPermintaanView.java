@@ -425,7 +425,7 @@ public class MenerimaPermintaanView extends JFrame {
         if (reason != null && !reason.trim().isEmpty()) {
             try {
                 PickupAssignment assignment = controller.getCurrentAssignment();
-                String rejectionStatus = "Rejected - " + reason;
+                String rejectionStatus = "Ditolak - " + reason;
 
                 PickupAssignmentController pickupController = new PickupAssignmentController();
                 boolean updated = pickupController.updateAssignmentStatus(assignment.getId(), rejectionStatus);

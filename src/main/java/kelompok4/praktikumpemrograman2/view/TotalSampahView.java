@@ -20,6 +20,14 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.math.BigDecimal;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
 
 public class TotalSampahView {
     private TotalSampahController controller;
@@ -29,6 +37,8 @@ public class TotalSampahView {
     };
     private JComboBox<String> monthComboBox;
     private JComboBox<Integer> yearComboBox;
+    private JComboBox<String> filterComboBox;
+    private JLabel totalLabel;
 
     public TotalSampahView() {
         controller = new TotalSampahController();
@@ -106,7 +116,7 @@ public class TotalSampahView {
 
         // Filter combo box
         String[] filterOptions = {"Semua", "Harian", "Mingguan", "Bulanan"};
-        JComboBox<String> filterComboBox = new JComboBox<>(filterOptions);
+        filterComboBox = new JComboBox<>(filterOptions);
         filterComboBox.setBackground(new Color(255, 250, 240));
         filterComboBox.setForeground(Color.BLACK);
         gbc.gridx = 1;
@@ -132,12 +142,20 @@ public class TotalSampahView {
         bottomPanel.add(yearComboBox, gbc);
 
         // Total label
-        JLabel totalLabel = new JLabel("Total Berat: 0.0 kg");
+        totalLabel = new JLabel("Total Berat: 0.0 kg");
         totalLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
         totalLabel.setForeground(new Color(139, 0, 0));
         gbc.gridx = 4;
         gbc.anchor = GridBagConstraints.EAST;
         bottomPanel.add(totalLabel, gbc);
+
+        // Export PDF Button
+        JButton exportPdfButton = new JButton("Export ke PDF");
+        exportPdfButton.setBackground(new Color(70, 130, 180));
+        exportPdfButton.setForeground(Color.WHITE);
+        exportPdfButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+        gbc.gridx = 5;
+        bottomPanel.add(exportPdfButton, gbc);
 
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
@@ -162,6 +180,9 @@ public class TotalSampahView {
                 updateTableData(tableModel, totalLabel, "Bulanan");
             }
         });
+
+        // ActionListener for export PDF button
+        exportPdfButton.addActionListener(e -> exportToPDF(tableModel));
 
         // Trigger initial load
         filterComboBox.setSelectedItem("Semua");
@@ -232,4 +253,94 @@ public class TotalSampahView {
         totalLabel.setText("Total Berat: " + totalWeight.setScale(2, RoundingMode.HALF_UP)
                 + " kg");
     }
+
+    private void exportToPDF(DefaultTableModel tableModel) {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Simpan PDF");
+        int userSelection = fileChooser.showSaveDialog(null);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            try {
+                String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+                if (!filePath.endsWith(".pdf")) {
+                    filePath += ".pdf";
+                }
+
+                // Membuat dokumen PDF
+                PdfWriter writer = new PdfWriter(filePath);
+                PdfDocument pdfDocument = new PdfDocument(writer);
+                Document document = new Document(pdfDocument, com.itextpdf.kernel.geom.PageSize.A4);
+                document.setMargins(36, 36, 36, 36);
+
+                // Menambahkan font
+                PdfFont font = PdfFontFactory.createFont(com.itextpdf.io.font.constants.StandardFonts.HELVETICA);
+                document.setFont(font);
+
+                // Judul dokumen
+                document.add(new Paragraph("Laporan Total Sampah")
+                        .setFont(font)
+                        .setFontSize(16)
+                        .setBold()
+                        .setTextAlignment(com.itextpdf.layout.properties.TextAlignment.CENTER));
+
+                // Add filter information
+                String filterInfo = "";
+                String selectedFilter = filterComboBox.getSelectedItem().toString();
+                switch (selectedFilter) {
+                    case "Harian" -> filterInfo = "Filter: Harian - " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+                    case "Mingguan" -> {
+                        LocalDate today = LocalDate.now();
+                        LocalDate startOfWeek = today.minusDays(today.getDayOfWeek().getValue() - 1);
+                        LocalDate endOfWeek = startOfWeek.plusDays(6);
+                        filterInfo = "Filter: Mingguan - " + startOfWeek.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) +
+                                " sampai " + endOfWeek.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+                    }
+                    case "Bulanan" -> filterInfo = "Filter: Bulanan - " + MONTHS[monthComboBox.getSelectedIndex()] +
+                            " " + yearComboBox.getSelectedItem();
+                    default -> filterInfo = "Filter: Semua Data";
+                }
+
+                document.add(new Paragraph(filterInfo)
+                        .setFont(font)
+                        .setFontSize(12)
+                        .setTextAlignment(com.itextpdf.layout.properties.TextAlignment.LEFT));
+
+                // Menambahkan tabel ke PDF
+                Table table = new Table(new float[]{2, 2, 1});  // Proportion for 3 columns
+                table.setWidth(com.itextpdf.layout.properties.UnitValue.createPercentValue(100));
+
+                // Header tabel
+                String[] columnNames = {"Tanggal", "Jenis Sampah", "Berat (kg)"};
+                for (String columnName : columnNames) {
+                    table.addHeaderCell(new Cell().add(new Paragraph(columnName).setFont(font).setBold()));
+                }
+
+                // Data tabel
+                for (int i = 0; i < tableModel.getRowCount(); i++) {
+                    for (int j = 0; j < tableModel.getColumnCount(); j++) {
+                        Object value = tableModel.getValueAt(i, j);
+                        table.addCell(new Cell().add(new Paragraph(value != null ? value.toString() : "").setFont(font)));
+                    }
+                }
+
+                document.add(table);
+
+                // Add total at the bottom
+                document.add(new Paragraph(totalLabel.getText())
+                        .setFont(font)
+                        .setFontSize(12)
+                        .setBold()
+                        .setTextAlignment(com.itextpdf.layout.properties.TextAlignment.RIGHT));
+
+                document.close();
+
+                JOptionPane.showMessageDialog(null, "Data berhasil diekspor ke PDF!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Gagal mengekspor data ke PDF: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
 }
