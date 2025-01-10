@@ -1,10 +1,9 @@
 package kelompok4.praktikumpemrograman2;
 
 import javax.swing.*;
-import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
+
 import com.formdev.flatlaf.intellijthemes.FlatGrayIJTheme;
 import kelompok4.praktikumpemrograman2.view.*;
 import net.miginfocom.swing.MigLayout;
@@ -32,12 +31,12 @@ public class MainFrame {
             JenisKategoriService service = new JenisKategoriService(sqlSession);
             JenisKategoriController controller = new JenisKategoriController(service);
 
-            JPanel jenisDanKategoriPanel = createPagePanel("Jenis dan Kategori", new JenisDanKategori(controller).getPanel(), cardPanel, mainMenuPanel);
+            JPanel jenisDanKategoriPanel = createPagePanel("Jenis dan Kategori", new JenisDanKategoriView(controller).getPanel(), cardPanel, mainMenuPanel);
             JPanel melihatPermintaanPanel = createPagePanel("Permintaan Penjemputan", new MelihatPermintaanView().getPanel(), cardPanel, mainMenuPanel);
             JPanel menerimaPermintaanPanel = createPagePanel("Menerima Permintaan Penjemputan", new MenerimaPermintaanView().getPanel(), cardPanel, mainMenuPanel);
             JPanel lokasiDropboxPanel = createPagePanel("Lokasi Dropbox", new LokasiDropboxView().getPanel(), cardPanel, mainMenuPanel);
             JPanel totalSampahPanel = createPagePanel("Total Sampah", new TotalSampahView().getPanel(), cardPanel, mainMenuPanel);
-            JPanel historyPenjemputanPanel = createPagePanel("History Penjemputan", new HistoryPenjemputan().getPanel(), cardPanel, mainMenuPanel);
+            JPanel historyPenjemputanPanel = createPagePanel("History Penjemputan", new HistoryPenjemputanView().getPanel(), cardPanel, mainMenuPanel);
             JPanel dropboxRatePanel = createPagePanel("Dropbox Rate", new DropboxRateView().getMainPanel(), cardPanel, mainMenuPanel);
             JPanel crudKurirPanel = createPagePanel("CRUD Kurir", new CrudKurirView(), cardPanel, mainMenuPanel);
 
