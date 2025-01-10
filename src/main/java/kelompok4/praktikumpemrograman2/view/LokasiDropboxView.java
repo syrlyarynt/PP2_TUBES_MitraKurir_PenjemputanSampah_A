@@ -1,11 +1,8 @@
 package kelompok4.praktikumpemrograman2.view;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.Component;
+import net.miginfocom.swing.MigLayout;
+
+import java.awt.*;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -31,7 +28,7 @@ class AlternatingRowColorRenderer extends DefaultTableCellRenderer {
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value,
-            boolean isSelected, boolean hasFocus, int row, int column) {
+                                                   boolean isSelected, boolean hasFocus, int row, int column) {
         Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
         if (!isSelected) {
@@ -41,7 +38,7 @@ class AlternatingRowColorRenderer extends DefaultTableCellRenderer {
         }
 
         setHorizontalAlignment(SwingConstants.CENTER);
-        
+
         return component;
     }
 }
@@ -53,36 +50,29 @@ public class LokasiDropboxView {
 
     public LokasiDropboxView() {
         dropboxController = new LokasiDropboxController();
-        panel = new JPanel(new BorderLayout());
+        panel = new JPanel(new MigLayout("fill, insets 10", "[grow]", "[][][grow][]"));
         initComponents();
     }
 
     private void initComponents() {
-        // Panel untuk judul
-        JPanel titlePanel = new JPanel(new BorderLayout());
-        titlePanel.setBackground(new Color(255, 250, 240));
-
+        // Title Panel
         JLabel titleLabel = new JLabel("Lokasi Dropbox", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
         titleLabel.setForeground(new Color(139, 0, 0));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        titlePanel.add(titleLabel, BorderLayout.CENTER);
+        panel.add(titleLabel, "cell 0 0, growx, gapbottom 15");
 
-        panel.add(titlePanel, BorderLayout.NORTH);
-
-        // Panel for dropbox list
-        JPanel tablePanel = new JPanel(new BorderLayout());
+        // Table Panel
         String[] columnNames = {"Nama Dropbox", "Alamat", "Jarak", "Kapasitas Max", "Kapasitas Terisi"};
         tableDropbox = new JTable();
         tableDropbox.setModel(new DefaultTableModel(new Object[0][0], columnNames));
 
-        // Set table styles
+        // Style table
         tableDropbox.getTableHeader().setBackground(new Color(255, 160, 122));
         tableDropbox.setBackground(new Color(255, 250, 240));
         tableDropbox.setFont(new Font("SansSerif", Font.PLAIN, 14));
         JTableHeader header = tableDropbox.getTableHeader();
         header.setFont(new Font("SansSerif", Font.BOLD, 14));
-        header.setForeground(new Color(255, 255, 255));
+        header.setForeground(Color.WHITE);
 
         // Set the alternating row color renderer
         AlternatingRowColorRenderer alternatingRenderer = new AlternatingRowColorRenderer();
@@ -91,53 +81,48 @@ public class LokasiDropboxView {
         }
 
         JScrollPane scrollPane = new JScrollPane(tableDropbox);
-        scrollPane.setPreferredSize(new Dimension(1000, 800));
-        tableDropbox.setFillsViewportHeight(true);
-        tablePanel.add(scrollPane, BorderLayout.CENTER);
+        scrollPane.setPreferredSize(new Dimension(800, 400));
+        panel.add(scrollPane, "cell 0 2, grow, push");
 
-        panel.add(tablePanel, BorderLayout.CENTER);
-
-        // Button Panel for Add, Edit, Delete
-        JPanel buttonPanel = new JPanel();
+        // Button Panel
+        JPanel buttonPanel = new JPanel(new MigLayout("", "[150][150][150]", "[]"));
         buttonPanel.setBackground(new Color(255, 250, 240));
-        JButton btnAdd = new JButton("Add Dropbox");
-        JButton btnEdit = new JButton("Edit Dropbox");
-        JButton btnDelete = new JButton("Delete Dropbox");
 
-        //style btns
-        btnAdd.setBackground(new Color(255, 160, 122));
-        btnAdd.setForeground(Color.WHITE);
-        btnAdd.setFont(new Font("SansSerif", Font.BOLD, 14));
+        JButton btnAdd = createStyledButton("Add Dropbox");
+        JButton btnEdit = createStyledButton("Edit Dropbox");
+        JButton btnDelete = createStyledButton("Delete Dropbox");
 
-        btnEdit.setBackground(new Color(255, 160, 122));
-        btnEdit.setForeground(Color.WHITE);
-        btnEdit.setFont(new Font("SansSerif", Font.BOLD, 14));
+        buttonPanel.add(btnAdd, "cell 0 0");
+        buttonPanel.add(btnEdit, "cell 1 0");
+        buttonPanel.add(btnDelete, "cell 2 0");
 
-        btnDelete.setBackground(new Color(255, 160, 122));
-        btnDelete.setForeground(Color.WHITE);
-        btnDelete.setFont(new Font("SansSerif", Font.BOLD, 14));
+        panel.add(buttonPanel, "cell 0 3, center");
 
-        buttonPanel.add(btnAdd);
-        buttonPanel.add(btnEdit);
-        buttonPanel.add(btnDelete);
-
-        // Action Listeners for Buttons
+        // Add action listeners
         btnAdd.addActionListener(e -> showAddDropboxDialog());
         btnEdit.addActionListener(e -> showEditDropboxDialog());
         btnDelete.addActionListener(e -> deleteDropbox());
 
-        panel.add(buttonPanel, BorderLayout.SOUTH);
-
         loadDropboxData();
+    }
+
+    private JButton createStyledButton(String text) {
+        JButton button = new JButton(text);
+        button.setBackground(new Color(255, 160, 122));
+        button.setForeground(Color.WHITE);
+        button.setFont(new Font("SansSerif", Font.BOLD, 14));
+        button.setFocusPainted(false);
+        button.setPreferredSize(new Dimension(150, 40));
+        return button;
     }
 
     private void loadDropboxData() {
         List<LokasiDropbox> dropboxes = dropboxController.getAllDropbox();
         DefaultTableModel model = (DefaultTableModel) tableDropbox.getModel();
-        model.setRowCount(0);  // Clear previous data
+        model.setRowCount(0);
 
         for (LokasiDropbox dropbox : dropboxes) {
-            model.addRow(new Object[] {
+            model.addRow(new Object[]{
                     dropbox.getNamaDropbox(),
                     dropbox.getAlamat(),
                     dropbox.getJarak(),
@@ -148,10 +133,41 @@ public class LokasiDropboxView {
     }
 
     private void showAddDropboxDialog() {
-        LokasiDropbox newDropbox = showDropboxDialog(null);
-        if (newDropbox != null) {
-            dropboxController.createDropbox(newDropbox);
-            loadDropboxData();  // Reload data after adding
+        JPanel panel = new JPanel(new GridLayout(5, 2));
+        panel.setBackground(new Color(255, 250, 240));
+
+        JTextField txtNamaDropbox = new JTextField();
+        JTextField txtAlamat = new JTextField();
+        JTextField txtJarak = new JTextField();
+        JTextField txtKapasitasMax = new JTextField();
+        JTextField txtKapasitasTerisi = new JTextField();
+
+        panel.add(new JLabel("Nama Dropbox:"));
+        panel.add(txtNamaDropbox);
+        panel.add(new JLabel("Alamat:"));
+        panel.add(txtAlamat);
+        panel.add(new JLabel("Jarak:"));
+        panel.add(txtJarak);
+        panel.add(new JLabel("Kapasitas Max:"));
+        panel.add(txtKapasitasMax);
+        panel.add(new JLabel("Kapasitas Terisi:"));
+        panel.add(txtKapasitasTerisi);
+
+        int result = JOptionPane.showConfirmDialog(null, panel, "Add Dropbox", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                LokasiDropbox dropbox = new LokasiDropbox();
+                dropbox.setNamaDropbox(txtNamaDropbox.getText());
+                dropbox.setAlamat(txtAlamat.getText());
+                dropbox.setJarak(new BigDecimal(txtJarak.getText()));
+                dropbox.setKapasitasMax(new BigDecimal(txtKapasitasMax.getText()));
+                dropbox.setKapasitasTerisi(new BigDecimal(txtKapasitasTerisi.getText()));
+
+                dropboxController.createDropbox(dropbox);
+                loadDropboxData();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Invalid input. Please try again.");
+            }
         }
     }
 
@@ -164,20 +180,46 @@ public class LokasiDropboxView {
 
         String namaDropbox = (String) tableDropbox.getValueAt(selectedRow, 0);
         List<LokasiDropbox> dropboxes = dropboxController.getAllDropbox();
-        LokasiDropbox existingDropbox = null;
-
-        for (LokasiDropbox dropbox : dropboxes) {
-            if (dropbox.getNamaDropbox().equals(namaDropbox)) {
-                existingDropbox = dropbox;
-                break;
-            }
-        }
+        LokasiDropbox existingDropbox = dropboxes.stream()
+                .filter(dropbox -> dropbox.getNamaDropbox().equals(namaDropbox))
+                .findFirst()
+                .orElse(null);
 
         if (existingDropbox != null) {
-            LokasiDropbox updatedDropbox = showDropboxDialog(existingDropbox);
-            if (updatedDropbox != null) {
-                dropboxController.updateDropbox(updatedDropbox);
-                loadDropboxData();  // Reload data after updating
+            JPanel panel = new JPanel(new GridLayout(5, 2));
+            panel.setBackground(new Color(255, 250, 240));
+
+            JTextField txtNamaDropbox = new JTextField(existingDropbox.getNamaDropbox());
+            JTextField txtAlamat = new JTextField(existingDropbox.getAlamat());
+            JTextField txtJarak = new JTextField(existingDropbox.getJarak().toString());
+            JTextField txtKapasitasMax = new JTextField(existingDropbox.getKapasitasMax().toString());
+            JTextField txtKapasitasTerisi = new JTextField(existingDropbox.getKapasitasTerisi().toString());
+
+            panel.add(new JLabel("Nama Dropbox:"));
+            panel.add(txtNamaDropbox);
+            panel.add(new JLabel("Alamat:"));
+            panel.add(txtAlamat);
+            panel.add(new JLabel("Jarak:"));
+            panel.add(txtJarak);
+            panel.add(new JLabel("Kapasitas Max:"));
+            panel.add(txtKapasitasMax);
+            panel.add(new JLabel("Kapasitas Terisi:"));
+            panel.add(txtKapasitasTerisi);
+
+            int result = JOptionPane.showConfirmDialog(null, panel, "Edit Dropbox", JOptionPane.OK_CANCEL_OPTION);
+            if (result == JOptionPane.OK_OPTION) {
+                try {
+                    existingDropbox.setNamaDropbox(txtNamaDropbox.getText());
+                    existingDropbox.setAlamat(txtAlamat.getText());
+                    existingDropbox.setJarak(new BigDecimal(txtJarak.getText()));
+                    existingDropbox.setKapasitasMax(new BigDecimal(txtKapasitasMax.getText()));
+                    existingDropbox.setKapasitasTerisi(new BigDecimal(txtKapasitasTerisi.getText()));
+
+                    dropboxController.updateDropbox(existingDropbox);
+                    loadDropboxData();
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, "Invalid input. Please try again.");
+                }
             }
         } else {
             JOptionPane.showMessageDialog(null, "Dropbox not found.");
@@ -192,60 +234,23 @@ public class LokasiDropboxView {
         }
 
         String namaDropbox = (String) tableDropbox.getValueAt(selectedRow, 0);
-        List<LokasiDropbox> dropboxes = dropboxController.getAllDropbox();
-        LokasiDropbox dropboxToDelete = null;
+        int confirm = JOptionPane.showConfirmDialog(null,
+                "Are you sure you want to delete '" + namaDropbox + "'?",
+                "Confirm Delete",
+                JOptionPane.YES_NO_OPTION);
 
-        for (LokasiDropbox dropbox : dropboxes) {
-            if (dropbox.getNamaDropbox().equals(namaDropbox)) {
-                dropboxToDelete = dropbox;
-                break;
+        if (confirm == JOptionPane.YES_OPTION) {
+            List<LokasiDropbox> dropboxes = dropboxController.getAllDropbox();
+            LokasiDropbox dropboxToDelete = dropboxes.stream()
+                    .filter(dropbox -> dropbox.getNamaDropbox().equals(namaDropbox))
+                    .findFirst()
+                    .orElse(null);
+
+            if (dropboxToDelete != null) {
+                dropboxController.deleteDropbox(dropboxToDelete.getId());
+                loadDropboxData();
             }
         }
-
-        if (dropboxToDelete != null) {
-            dropboxController.deleteDropbox(dropboxToDelete.getId());
-            loadDropboxData();  // Reload data after deleting
-        } else {
-            JOptionPane.showMessageDialog(null, "Dropbox not found.");
-        }
-    }
-
-    private LokasiDropbox showDropboxDialog(LokasiDropbox existingDropbox) {
-        JTextField txtNamaDropbox = new JTextField(existingDropbox != null ? existingDropbox.getNamaDropbox() : "");
-        JTextField txtAlamat = new JTextField(existingDropbox != null ? existingDropbox.getAlamat() : "");
-        JTextField txtJarak = new JTextField(existingDropbox != null ? existingDropbox.getJarak().toString() : "");
-        JTextField txtKapasitasMax = new JTextField(existingDropbox != null ? existingDropbox.getKapasitasMax().toString() : "");
-        JTextField txtKapasitasTerisi = new JTextField(existingDropbox != null ? existingDropbox.getKapasitasTerisi().toString() : "");
-
-        JPanel panel = new JPanel(new GridLayout(5, 2));
-        panel.setBackground(new Color(255, 250, 240)); // Cream background
-
-        panel.add(new JLabel("Nama Dropbox:"));
-        panel.add(txtNamaDropbox);
-        panel.add(new JLabel("Alamat:"));
-        panel.add(txtAlamat);
-        panel.add(new JLabel("Jarak:"));
-        panel.add(txtJarak);
-        panel.add(new JLabel("Kapasitas Max:"));
-        panel.add(txtKapasitasMax);
-        panel.add(new JLabel("Kapasitas Terisi:"));
-        panel.add(txtKapasitasTerisi);
-
-        int result = JOptionPane.showConfirmDialog(null, panel, existingDropbox == null ? "Add Dropbox" : "Edit Dropbox", JOptionPane.OK_CANCEL_OPTION);
-        if (result == JOptionPane.OK_OPTION) {
-            try {
-                LokasiDropbox dropbox = existingDropbox != null ? existingDropbox : new LokasiDropbox();
-                dropbox.setNamaDropbox(txtNamaDropbox.getText());
-                dropbox.setAlamat(txtAlamat.getText());
-                dropbox.setJarak(new BigDecimal(txtJarak.getText()));
-                dropbox.setKapasitasMax(new BigDecimal(txtKapasitasMax.getText()));
-                dropbox.setKapasitasTerisi(new BigDecimal(txtKapasitasTerisi.getText()));
-                return dropbox;
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Invalid input. Please try again.");
-            }
-        }
-        return null;
     }
 
     public JPanel getPanel() {
