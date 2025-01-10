@@ -1,5 +1,8 @@
+
+
 package kelompok4.praktikumpemrograman2.controller;
 
+import kelompok4.praktikumpemrograman2.model.Kurir;
 import kelompok4.praktikumpemrograman2.model.PickupAssignment;
 import kelompok4.praktikumpemrograman2.services.PickupAssignmentService;
 import kelompok4.praktikumpemrograman2.model.History;
@@ -14,11 +17,13 @@ public class PickupAssignmentController {
     private final PickupAssignmentService service;
     private final HistoryService historyService;
     private final SqlSession sqlSession;
+    private final KurirController kurirController;
 
     public PickupAssignmentController() {
         this.sqlSession = MyBatisUtil.getSqlSession();
         this.service = new PickupAssignmentService(sqlSession);
         this.historyService = new HistoryService(sqlSession);
+        this.kurirController = new KurirController();
         System.out.println("PickupAssignmentController initialized");
     }
 
@@ -40,14 +45,59 @@ public class PickupAssignmentController {
         }
     }
 
-    public void createAssignment(PickupAssignment assignment) {
+//    public void createAssignment(PickupAssignment assignment, int kurirId) {
+//        try {
+//            if (assignment.getStatus() == null || assignment.getStatus().isEmpty()) {
+//                assignment.setStatus("Assigned");
+//            }
+//            assignment.setKurirId(kurirId); // Menambahkan kurir ke tugas
+//            service.createAssignment(assignment, kurirId);
+//        } catch (Exception e) {
+//            System.err.println("Error in createAssignment: " + e.getMessage());
+//            throw e;
+//        }
+//    }
+
+    public void createAssignment(PickupAssignment assignment, int kurirId) {
         try {
+            // Update courier status to Busy
+            Kurir kurir = kurirController.getKurirById(kurirId);
+            if (kurir != null) {
+                kurirController.updateKurir(
+                        kurirId,
+                        kurir.getNama(),
+                        kurir.getNomorTelepon(),
+                        kurir.getAlamatKurir(),
+                        "Busy"
+                );
+            }
+
             if (assignment.getStatus() == null || assignment.getStatus().isEmpty()) {
                 assignment.setStatus("Assigned");
             }
-            service.createAssignment(assignment);
+            assignment.setKurirId(kurirId);
+            service.createAssignment(assignment, kurirId);
         } catch (Exception e) {
             System.err.println("Error in createAssignment: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    // New method to update courier status
+    public void updateCourierStatus(int kurirId, String status) {
+        try {
+            Kurir kurir = kurirController.getKurirById(kurirId);
+            if (kurir != null) {
+                kurirController.updateKurir(
+                        kurirId,
+                        kurir.getNama(),
+                        kurir.getNomorTelepon(),
+                        kurir.getAlamatKurir(),
+                        status
+                );
+            }
+        } catch (Exception e) {
+            System.err.println("Error updating courier status: " + e.getMessage());
             throw e;
         }
     }
@@ -57,7 +107,7 @@ public class PickupAssignmentController {
             throw new IllegalArgumentException("Assignment cannot be null");
         }
 
-        try (SqlSession sqlSession = MyBatisUtil.getSqlSession()) {
+        try {
             System.out.println("Fetching existing assignment with ID: " + assignment.getId());
             PickupAssignment existing = service.getAssignmentById(assignment.getId());
 
@@ -69,6 +119,7 @@ public class PickupAssignmentController {
             }
 
             System.out.println("Updating assignment in the database...");
+            assignment.setKurirId(existing.getKurirId()); // Memastikan kurir tetap sama jika tidak diubah
             service.updateAssignment(assignment);
 
             System.out.println("Assignment updated successfully: " + assignment);
@@ -77,7 +128,6 @@ public class PickupAssignmentController {
             throw new RuntimeException("Failed to update assignment: " + e.getMessage(), e);
         }
     }
-
 
     public void deleteAssignment(int id) {
         try {
@@ -102,11 +152,71 @@ public class PickupAssignmentController {
         }
     }
 
+//    public boolean completeAssignment(int id, double actualWeight, double finalPrice, String notes) {
+//        try {
+//            PickupAssignment assignment = service.getAssignmentById(id);
+//            if (assignment == null) {
+//                throw new IllegalArgumentException("Assignment not found with id: " + id);
+//            }
+//
+//            // Pastikan tugas sudah memiliki kurir sebelum diselesaikan
+//            if (assignment.getKurirId() == 0) {
+//                throw new IllegalStateException("Cannot complete assignment without a designated courier.");
+//            }
+//
+//            assignment.setStatus("Completed");
+//            assignment.setBeratAktual(new java.math.BigDecimal(actualWeight));
+//            assignment.setHargaFinal(new java.math.BigDecimal(finalPrice));
+//            assignment.setCompletionDate(LocalDateTime.now());
+//            assignment.setNotes(notes);
+//
+//            service.updateAssignment(assignment);
+//            return true;
+//        } catch (Exception e) {
+//            System.err.println("Error completing assignment: " + e.getMessage());
+//            return false;
+//        }
+//    }
+//
+//    public boolean rejectAssignment(int id, String reason) {
+//        try {
+//            PickupAssignment assignment = service.getAssignmentById(id);
+//            if (assignment == null) {
+//                throw new IllegalArgumentException("Assignment not found with id: " + id);
+//            }
+//
+//            assignment.setStatus("Rejected - " + reason);
+//            assignment.setNotes(reason);
+//            service.updateAssignment(assignment);
+//
+//            History history = new History();
+//            history.setPickupAssignmentId(id);
+//            history.setWaktuSelesai(LocalDateTime.now());
+//            history.setLokasi(assignment.getDropbox().getNamaDropbox());
+//            history.setKategoriSampah(assignment.getPermintaan().getKategoriSampahId());
+//            history.setBeratSampah(assignment.getTotalWeight());
+//            history.setHarga(assignment.getTotalCost());
+//            history.setStatusPenyelesaian("Ditolak - " + reason);
+//
+//            historyService.insertHistory(history);
+//
+//            return true;
+//        } catch (Exception e) {
+//            System.err.println("Error rejecting assignment: " + e.getMessage());
+//            return false;
+//        }
+//    }
+
     public boolean completeAssignment(int id, double actualWeight, double finalPrice, String notes) {
         try {
             PickupAssignment assignment = service.getAssignmentById(id);
             if (assignment == null) {
                 throw new IllegalArgumentException("Assignment not found with id: " + id);
+            }
+
+            // Pastikan tugas sudah memiliki kurir sebelum diselesaikan
+            if (assignment.getKurirId() == 0) {
+                throw new IllegalStateException("Cannot complete assignment without a designated courier.");
             }
 
             assignment.setStatus("Completed");
@@ -116,6 +226,10 @@ public class PickupAssignmentController {
             assignment.setNotes(notes);
 
             service.updateAssignment(assignment);
+
+            // Update courier status back to Available
+            updateCourierStatus(assignment.getKurirId(), "Available");
+
             return true;
         } catch (Exception e) {
             System.err.println("Error completing assignment: " + e.getMessage());
@@ -130,12 +244,13 @@ public class PickupAssignmentController {
                 throw new IllegalArgumentException("Assignment not found with id: " + id);
             }
 
-            // Update the assignment's status to "Rejected"
             assignment.setStatus("Rejected - " + reason);
             assignment.setNotes(reason);
             service.updateAssignment(assignment);
 
-            // Record the rejection in the history table
+            // Update courier status back to Available
+            updateCourierStatus(assignment.getKurirId(), "Available");
+
             History history = new History();
             history.setPickupAssignmentId(id);
             history.setWaktuSelesai(LocalDateTime.now());

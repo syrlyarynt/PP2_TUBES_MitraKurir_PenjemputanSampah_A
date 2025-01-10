@@ -6,6 +6,7 @@ import kelompok4.praktikumpemrograman2.model.JenisKategori;
 import kelompok4.praktikumpemrograman2.model.PermintaanPenjemputan;
 import kelompok4.praktikumpemrograman2.model.LokasiDropbox;
 import kelompok4.praktikumpemrograman2.model.PickupAssignment;
+import kelompok4.praktikumpemrograman2.model.Kurir;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -22,12 +23,14 @@ public class MelihatPermintaanView extends JFrame {
     private DefaultTableModel tableModel;
     private JComboBox<String> filterComboBox;
     private PermintaanPenjemputanController controller;
+    private PickupAssignmentController assignmentController;
 
     public MelihatPermintaanView() {
         setTitle("Daftar Permintaan Penjemputan");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         controller = new PermintaanPenjemputanController();
+        assignmentController = new PickupAssignmentController();
 
         panel = new JPanel(new BorderLayout());
         panel.setBackground(new Color(255, 250, 240));
@@ -51,7 +54,7 @@ public class MelihatPermintaanView extends JFrame {
         filterPanel.setBackground(new Color(255, 250, 240));
         panel.add(filterPanel, BorderLayout.SOUTH);
 
-        String[] columnNames = {"ID", "Nama", "Alamat", "Jenis Sampah", "Berat (kg)", "Harga", "Status", "Lokasi Dropbox"};
+        String[] columnNames = {"ID", "Nama", "Alamat", "Jenis Sampah", "Berat (kg)", "Harga", "Status", "Lokasi Dropbox", "Kurir"};
         tableModel = new DefaultTableModel(columnNames, 0);
         pickupTable = new JTable(tableModel) {
             @Override
@@ -70,7 +73,7 @@ public class MelihatPermintaanView extends JFrame {
             }
         };
 
-        // bwt warna header tabel
+        // Warna header tabel
         pickupTable.getTableHeader().setDefaultRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
@@ -123,7 +126,10 @@ public class MelihatPermintaanView extends JFrame {
         List<PermintaanPenjemputan> permintaanList = controller.getAllPermintaan();
         for (PermintaanPenjemputan permintaan : permintaanList) {
             LokasiDropbox dropbox = permintaan.getLokasiDropbox();
+            PickupAssignment assignment = assignmentController.getAssignmentById(permintaan.getIdPermintaan());
             String dropboxName = (dropbox != null) ? dropbox.getNamaDropbox() : "-";
+            String kurirName = (assignment != null && assignment.getKurir() != null) ? assignment.getKurir().getNama() : "Belum Ditentukan";
+
             tableModel.addRow(new Object[]{
                     permintaan.getIdPermintaan(),
                     permintaan.getNamaPelanggan(),
@@ -132,7 +138,8 @@ public class MelihatPermintaanView extends JFrame {
                     permintaan.getBerat(),
                     permintaan.getHarga(),
                     permintaan.getStatus(),
-                    dropboxName
+                    dropboxName,
+                    kurirName
             });
         }
     }
@@ -148,6 +155,7 @@ public class MelihatPermintaanView extends JFrame {
         worker.execute();
     }
 
+
     private void handlePickup() {
         int selectedRow = pickupTable.getSelectedRow();
         if (selectedRow >= 0) {
@@ -159,7 +167,7 @@ public class MelihatPermintaanView extends JFrame {
                     @Override
                     protected Void doInBackground() {
                         try {
-
+                            // Pilih Dropbox
                             Integer dropboxId = permintaan.getDropboxId();
                             if (dropboxId == null) {
                                 List<LokasiDropbox> dropboxList = controller.getAllDropbox();
@@ -185,18 +193,76 @@ public class MelihatPermintaanView extends JFrame {
                                 dropboxId = selectedDropbox.getId();
                             }
 
-                            // Create new PickupAssignment
+                            // Get available couriers only
+                            List<Kurir> allKurirList = controller.getAllKurir();
+                            List<Kurir> availableKurirList = allKurirList.stream()
+                                    .filter(kurir -> "Available".equals(kurir.getStatus()))
+                                    .toList();
+
+                            if (availableKurirList.isEmpty()) {
+                                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(
+                                        MelihatPermintaanView.this,
+                                        "Tidak ada kurir yang tersedia saat ini.",
+                                        "Peringatan",
+                                        JOptionPane.WARNING_MESSAGE
+                                ));
+                                return null;
+                            }
+
+                            // Custom renderer untuk menampilkan status kurir
+                            JComboBox<Kurir> kurirComboBox = new JComboBox<>(
+                                    availableKurirList.toArray(new Kurir[0]));
+                            kurirComboBox.setRenderer(new DefaultListCellRenderer() {
+                                @Override
+                                public Component getListCellRendererComponent(
+                                        JList<?> list, Object value, int index,
+                                        boolean isSelected, boolean cellHasFocus) {
+                                    if (value instanceof Kurir kurir) {
+                                        value = String.format("%s (%s)",
+                                                kurir.getNama(),
+                                                kurir.getStatus());
+                                    }
+                                    return super.getListCellRendererComponent(
+                                            list, value, index, isSelected, cellHasFocus);
+                                }
+                            });
+
+                            // Show dialog with custom combobox
+                            int result = JOptionPane.showConfirmDialog(
+                                    MelihatPermintaanView.this,
+                                    kurirComboBox,
+                                    "Pilih Kurir",
+                                    JOptionPane.OK_CANCEL_OPTION,
+                                    JOptionPane.QUESTION_MESSAGE
+                            );
+
+                            if (result != JOptionPane.OK_OPTION) {
+                                return null;
+                            }
+
+                            Kurir selectedKurir = (Kurir) kurirComboBox.getSelectedItem();
+                            if (selectedKurir == null) {
+                                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(
+                                        MelihatPermintaanView.this,
+                                        "Harus memilih kurir untuk melanjutkan pickup.",
+                                        "Peringatan",
+                                        JOptionPane.WARNING_MESSAGE
+                                ));
+                                return null;
+                            }
+
+                            // Buat PickupAssignment
                             PickupAssignment assignment = new PickupAssignment();
                             assignment.setPermintaanId(permintaan.getIdPermintaan());
                             assignment.setDropboxId(dropboxId);
+                            assignment.setKurirId(selectedKurir.getId());
                             assignment.setStatus("Assigned");
                             assignment.setPickupDate(LocalDateTime.now());
                             assignment.setTotalWeight(permintaan.getBerat());
                             assignment.setTotalCost(permintaan.getHarga());
 
-                            // Save assignment using PickupAssignmentController
-                            PickupAssignmentController pickupController = new PickupAssignmentController();
-                            pickupController.createAssignment(assignment);
+                            // Create assignment (courier status will be updated within PickupAssignmentController)
+                            assignmentController.createAssignment(assignment, selectedKurir.getId());
 
                             // Update permintaan status
                             permintaan.setStatus("Dalam Proses");
@@ -206,11 +272,11 @@ public class MelihatPermintaanView extends JFrame {
                             SwingUtilities.invokeLater(() -> {
                                 JOptionPane.showMessageDialog(
                                         MelihatPermintaanView.this,
-                                        "Pickup berhasil diproses.",
+                                        "Pickup berhasil diproses dengan kurir: " + selectedKurir.getNama(),
                                         "Sukses",
                                         JOptionPane.INFORMATION_MESSAGE
                                 );
-                                loadPermintaanDataInBackground(); // Refresh the table
+                                loadPermintaanDataInBackground();
                             });
 
                         } catch (Exception e) {
@@ -333,7 +399,8 @@ public class MelihatPermintaanView extends JFrame {
                     JOptionPane.showMessageDialog(this,
                             "Silakan pilih jenis sampah!",
                             "Error",
-                            JOptionPane.ERROR_MESSAGE);return;
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
 
                 // Get and validate selected dropbox

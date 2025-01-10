@@ -81,17 +81,6 @@ public interface PermintaanPenjemputanMapper {
     @Select("SELECT LAST_INSERT_ID()")
     Long getLastInsertId();
 
-
-
-
-    // Update existing permintaan
-//    @Update("UPDATE permintaanpenjemputan SET namaPelanggan = #{namaPelanggan}, " +
-//            "alamat = #{alamat}, kategoriSampah = #{kategoriSampahId}, " +
-//            "berat = #{berat}, harga = #{harga}, waktuPermintaan = #{waktuPermintaan}, " +
-//            "status = #{status}, dropbox_id = #{dropboxId}, total_biaya = #{totalBiaya} " +
-//            "WHERE IDpermintaan = #{idPermintaan}")
-//    void updatePermintaan(PermintaanPenjemputan permintaan);
-
     // Update existing permintaan - Hanya update status
     @Update("UPDATE permintaanpenjemputan SET status = #{status} WHERE IDpermintaan = #{idPermintaan}")
     void updatePermintaan(PermintaanPenjemputan permintaan);
