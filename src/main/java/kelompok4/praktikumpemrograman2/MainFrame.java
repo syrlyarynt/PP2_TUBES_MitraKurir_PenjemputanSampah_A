@@ -72,7 +72,10 @@ public class MainFrame {
     private static JPanel createPagePanel(String title, JPanel pageContent, JPanel cardPanel, JPanel mainMenuPanel) {
         JPanel panel = new JPanel(new BorderLayout());
 
-        JButton backButton = new JButton("Kembali ke Main Menu");
+        JButton backButton = new JButton("Kembali ke Halaman Utama");
+        backButton.setBackground(new Color(255, 160, 122));  
+        backButton.setForeground(Color.WHITE);  
+        backButton.setFont(new Font("SansSerif", Font.BOLD, 14)); 
         backButton.addActionListener(e -> {
             CardLayout layout = (CardLayout) cardPanel.getLayout();
             layout.show(cardPanel, "MainMenu");

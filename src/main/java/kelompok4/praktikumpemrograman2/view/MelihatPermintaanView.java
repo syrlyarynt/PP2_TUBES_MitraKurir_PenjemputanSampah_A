@@ -86,7 +86,7 @@ public class MelihatPermintaanView extends JFrame {
                 return headerLabel;
             }
         });
-        pickupTable.setBackground(new Color(255, 250, 240));
+        pickupTable.setBackground(new Color(255, 239, 213));
 
         JScrollPane tableScrollPane = new JScrollPane(pickupTable);
         panel.add(tableScrollPane, BorderLayout.CENTER);
