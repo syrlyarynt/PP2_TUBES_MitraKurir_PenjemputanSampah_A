@@ -1,12 +1,27 @@
 package kelompok4.praktikumpemrograman2.view;
 
-import net.miginfocom.swing.MigLayout;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Image;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
 
 import kelompok4.praktikumpemrograman2.controller.JenisKategoriController;
 import kelompok4.praktikumpemrograman2.model.JenisKategori;
@@ -19,39 +34,74 @@ public class JenisDanKategoriView {
     public JenisDanKategoriView(JenisKategoriController controller) {
         this.controller = controller;
         panel = new JPanel(new BorderLayout());
-        JPanel mainPanel = new JPanel(new MigLayout("", "[grow]", "[][][grow][]"));
+        panel.setBackground(new Color(255, 250, 240)); // Cream background
+        initComponents();
+    }
 
-        JLabel titleLabel = new JLabel("Jenis dan Kategori Sampah");
-        titleLabel.setFont(new Font("Arial", Font.PLAIN, 20));
-        mainPanel.add(titleLabel, "span, align center, wrap");
+    private void initComponents() {
+        // Panel untuk judul
+        JPanel titlePanel = new JPanel(new BorderLayout());
+        titlePanel.setBackground(new Color(255, 250, 240));
 
+        JLabel titleLabel = new JLabel("Jenis dan Kategori Sampah", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+        titleLabel.setForeground(new Color(139, 0, 0));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        titlePanel.add(titleLabel, BorderLayout.CENTER);
+        panel.add(titlePanel, BorderLayout.NORTH);
+
+        // Main Content Panel
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(255, 250, 240));
+
+        // List Panel
         DefaultListModel<KategoriItem> listModel = new DefaultListModel<>();
         loadKategoriData(listModel);
         JList<KategoriItem> list = new JList<>(listModel);
         list.setCellRenderer(new CustomCellRenderer());
+        list.setBackground(new Color(255, 239, 213));
 
         JScrollPane scrollPane = new JScrollPane(list);
-        scrollPane.setPreferredSize(new Dimension(1000, 500));
-        mainPanel.add(scrollPane, "span, grow, wrap");
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        panel.add(mainPanel, BorderLayout.CENTER);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        // Button Panel
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setBackground(new Color(255, 250, 240));
         JButton addButton = new JButton("Add");
         JButton deleteButton = new JButton("Delete");
         JButton updateButton = new JButton("Update");
         JButton refreshButton = new JButton("Refresh");
+
+        //style masing btns
+        addButton.setBackground(new Color(255, 160, 122));
+        addButton.setForeground(Color.WHITE);
+        addButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        deleteButton.setBackground(new Color(255, 160, 122));
+        deleteButton.setForeground(Color.WHITE);
+        deleteButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        updateButton.setBackground(new Color(255, 160, 122));
+        updateButton.setForeground(Color.WHITE);
+        updateButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        refreshButton.setBackground(new Color(255, 160, 122));
+        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+
 
         addButton.addActionListener(e -> onAdd(listModel));
         deleteButton.addActionListener(e -> onDelete(list.getSelectedValue(), listModel));
         updateButton.addActionListener(e -> onUpdate(list.getSelectedValue(), listModel));
         refreshButton.addActionListener(e -> onRefresh(listModel));
 
+
         buttonPanel.add(addButton);
         buttonPanel.add(deleteButton);
         buttonPanel.add(updateButton);
         buttonPanel.add(refreshButton);
-
-        mainPanel.add(buttonPanel, "span, wrap");
-        panel.add(mainPanel, BorderLayout.CENTER);
+        panel.add(buttonPanel, BorderLayout.SOUTH);
     }
 
     private ImageIcon scaleIcon(ImageIcon icon, int height) {
@@ -75,9 +125,7 @@ public class JenisDanKategoriView {
             if (iconFile.exists()) {
                 ImageIcon originalIcon = new ImageIcon(iconPath);
                 listModel.addElement(new KategoriItem(kategori.getId(), kategori.getNama(), iconPath, scaleIcon(originalIcon, 30)));
-                System.out.println("Loaded: ID=" + kategori.getId() + ", Name=" + kategori.getNama() + ", Icon Path=" + iconPath);
             } else {
-                System.out.println("Warning: Icon file not found for ID=" + kategori.getId() + ", Icon Path=" + iconPath);
                 listModel.addElement(new KategoriItem(kategori.getId(), kategori.getNama(), null, null));
             }
         }
@@ -101,7 +149,6 @@ public class JenisDanKategoriView {
 
                     controller.insertKategori(newKategori);
                     listModel.addElement(new KategoriItem(newKategori.getId(), name, ICON_FOLDER + fileName, scaleIcon(new ImageIcon(targetFile.getPath()), 30)));
-                    System.out.println("Added: Name=" + name + ", Icon=" + fileName);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(panel, "Error adding category: " + ex.getMessage());
                 }
@@ -109,13 +156,13 @@ public class JenisDanKategoriView {
         }
     }
 
+
     private void onDelete(KategoriItem selectedItem, DefaultListModel<KategoriItem> listModel) {
         if (selectedItem != null) {
             int confirm = JOptionPane.showConfirmDialog(panel, "Are you sure to delete " + selectedItem.name + "?");
             if (confirm == JOptionPane.YES_OPTION) {
                 controller.deleteKategori(selectedItem.id);
                 listModel.removeElement(selectedItem);
-                System.out.println("Deleted: ID=" + selectedItem.id + ", Name=" + selectedItem.name);
             }
         }
     }
@@ -131,22 +178,12 @@ public class JenisDanKategoriView {
                 updatedKategori.setIcon(selectedItem.iconPath != null ? new File(selectedItem.iconPath).getName() : null);
                 controller.updateKategori(updatedKategori);
                 listModel.set(listModel.indexOf(selectedItem), selectedItem);
-                System.out.println("Updated: ID=" + selectedItem.id + ", New Name=" + newName);
             }
         }
     }
 
     private void onRefresh(DefaultListModel<KategoriItem> listModel) {
         loadKategoriData(listModel);
-        System.out.println("Refreshed category list.");
-    }
-
-    private void printListContents(DefaultListModel<KategoriItem> listModel) {
-        System.out.println("Current List Contents:");
-        for (int i = 0; i < listModel.size(); i++) {
-            KategoriItem item = listModel.getElementAt(i);
-            System.out.println("  - ID=" + item.id + ", Name=" + item.name + ", Icon Path=" + (item.iconPath != null ? item.iconPath : "null"));
-        }
     }
 
     public JPanel getPanel() {
@@ -180,6 +217,14 @@ public class JenisDanKategoriView {
                 KategoriItem item = (KategoriItem) value;
                 label.setIcon(item.icon);
                 label.setText(item.name);
+
+                if (!isSelected) {
+                    if (index % 2 == 0) {
+                        label.setBackground(new Color(255, 250, 240)); // Krem untuk baris genap
+                    } else {
+                        label.setBackground(new Color(255, 239, 213)); // Oranye muda untuk baris ganjil
+                    }
+                }
             }
             return label;
         }
