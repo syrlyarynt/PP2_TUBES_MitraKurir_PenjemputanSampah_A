@@ -8,6 +8,7 @@ import com.itextpdf.layout.element.Table;
 import kelompok4.praktikumpemrograman2.controller.HistoryController;
 import kelompok4.praktikumpemrograman2.model.History;
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.format.DateTimeFormatter;
@@ -32,6 +33,13 @@ public class HistoryPenjemputanView {
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(new Color(255, 250, 240));
 
+        // Tambahkan JLabel "History Penjemputan"
+        JLabel headerLabel = new JLabel("History Penjemputan", SwingConstants.CENTER);
+        headerLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
+        headerLabel.setForeground(new Color(139, 0, 0));
+        headerLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 10, 0));
+        mainPanel.add(headerLabel, BorderLayout.NORTH);
+
         // Panel untuk judul
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(new Color(255, 250, 240));
@@ -46,7 +54,7 @@ public class HistoryPenjemputanView {
         topPanel.add(titleLabel, BorderLayout.CENTER);
 
         refreshButton = new JButton("Refresh");
-        refreshButton.setBackground(new Color(70, 130, 180));
+        refreshButton.setBackground(new Color(255, 160, 122));
         refreshButton.setForeground(Color.WHITE);
         refreshButton.setFont(new Font("SansSerif", Font.BOLD, 14));
         refreshButton.addActionListener(e -> handleRefresh());
@@ -56,17 +64,7 @@ public class HistoryPenjemputanView {
         exportPdfButton.setForeground(Color.WHITE);
         exportPdfButton.setFont(new Font("SansSerif", Font.BOLD, 14));
         exportPdfButton.addActionListener(e -> exportToPDF());
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttonPanel.setBackground(new Color(255, 250, 240));
-        buttonPanel.add(refreshButton);
-        buttonPanel.add(exportPdfButton);
-
-        topPanel.add(titlePanel, BorderLayout.CENTER);
-        topPanel.add(buttonPanel, BorderLayout.EAST);
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        mainPanel.add(topPanel, BorderLayout.NORTH);
+        
 
         // Setup tabel
         String[] columnNames = {
@@ -81,28 +79,63 @@ public class HistoryPenjemputanView {
         JScrollPane scrollPane = new JScrollPane(table);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Panel bawah untuk total penjemputan
+        // Panel bawah untuk tombol dan total
         JPanel bottomPanel = new JPanel(new GridBagLayout());
         bottomPanel.setBackground(new Color(255, 250, 240));
 
+        // Pengaturan GridBagConstraints
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5); // Memberikan sedikit jarak antara elemen
 
+        // Tombol di tengah
+        refreshButton = new JButton("Refresh");
+        refreshButton.setBackground(new Color(255, 160, 122));
+        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+        refreshButton.addActionListener(e -> handleRefresh());
+
+        exportPdfButton = new JButton("Export ke PDF");
+        exportPdfButton.setBackground(new Color(70, 130, 180));
+        exportPdfButton.setForeground(Color.WHITE);
+        exportPdfButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+        exportPdfButton.addActionListener(e -> exportToPDF());
+
+        // Panel untuk tombol
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setBackground(new Color(255, 250, 240));
+        buttonPanel.add(refreshButton);
+        buttonPanel.add(exportPdfButton);
+
+        // Atur tombol di tengah GridBagLayout
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2; 
+        gbc.anchor = GridBagConstraints.CENTER; 
+        bottomPanel.add(buttonPanel, gbc);
+
+        // Label total penjemputan
         totalLabel = new JLabel("Total Penjemputan: " + tableModel.getRowCount());
         totalLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
         totalLabel.setForeground(new Color(139, 0, 0));
-        gbc.gridx = 0;
+        totalLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+
+        // Atur label di sebelah kanan
+        gbc.gridx = 3; 
         gbc.gridy = 0;
+        gbc.gridwidth = 1; 
         gbc.anchor = GridBagConstraints.EAST;
         bottomPanel.add(totalLabel, gbc);
 
+        // Tambahkan bottomPanel ke mainPanel
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
-        // Perbarui data tabel dan label total
+        // Perbarui data tabel
         updateTableData();
 
         return mainPanel;
     }
+
 
     private void setupTableProperties() {
         table.setBackground(new Color(255, 239, 213));
@@ -113,8 +146,23 @@ public class HistoryPenjemputanView {
         table.getTableHeader().setBackground(new Color(255, 160, 122));
         table.getTableHeader().setForeground(Color.WHITE);
         table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
-    }
 
+        // Warna bergantian untuk baris tabel
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    if (row % 2 == 0) {
+                        cell.setBackground(new Color(255, 250, 240)); // Krem untuk baris genap
+                    } else {
+                        cell.setBackground(new Color(255, 239, 213)); // Oranye muda untuk baris ganjil
+                    }
+                }
+                return cell;
+            }
+        });
+    }
     private void updateTableData() {
         try {
             tableModel.setRowCount(0);

@@ -211,7 +211,7 @@ public class MenerimaPermintaanView extends JFrame {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
         terimaButton = new JButton("Terima");
-        terimaButton.setBackground(new Color(34, 139, 34));
+        terimaButton.setBackground(new Color(255, 160, 122));
         terimaButton.setForeground(Color.WHITE);
         terimaButton.setFont(new Font("SansSerif", Font.BOLD, 14));
         terimaButton.addActionListener(e -> handleTerima());
@@ -223,7 +223,7 @@ public class MenerimaPermintaanView extends JFrame {
         tolakButton.addActionListener(e -> handleTolak());
 
         JButton completeButton = new JButton("Selesaikan");
-        completeButton.setBackground(new Color(60, 179, 113)); // Warna hijau
+        completeButton.setBackground(new Color(255, 160, 122)); 
         completeButton.setForeground(Color.WHITE);
         completeButton.setFont(new Font("SansSerif", Font.BOLD, 14));
         completeButton.addActionListener(e -> handleMarkAsCompleted());
@@ -233,7 +233,7 @@ public class MenerimaPermintaanView extends JFrame {
 
         // Tombol Refresh
         refreshButton = new JButton("Refresh");
-        refreshButton.setBackground(new Color(70, 130, 180)); // Warna biru tema
+        refreshButton.setBackground(new Color(255, 160, 122)); 
         refreshButton.setForeground(Color.WHITE);
         refreshButton.setFont(new Font("SansSerif", Font.BOLD, 14));
         refreshButton.addActionListener(e -> handleRefresh());

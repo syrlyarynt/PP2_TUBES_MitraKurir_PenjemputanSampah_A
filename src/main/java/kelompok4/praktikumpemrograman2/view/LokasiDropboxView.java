@@ -112,7 +112,7 @@ public class LokasiDropboxView {
         button.setForeground(Color.WHITE);
         button.setFont(new Font("SansSerif", Font.BOLD, 14));
         button.setFocusPainted(false);
-        button.setPreferredSize(new Dimension(150, 40));
+        button.setPreferredSize(new Dimension(120, 30));
         return button;
     }
 
