@@ -1,13 +1,32 @@
 package kelompok4.praktikumpemrograman2.view;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Frame;
+import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+
 import kelompok4.praktikumpemrograman2.controller.KurirController;
 import kelompok4.praktikumpemrograman2.model.Kurir;
 import net.miginfocom.swing.MigLayout;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.util.List;
 
 public class CrudKurirView extends JPanel {
     private final KurirController controller;
@@ -16,32 +35,61 @@ public class CrudKurirView extends JPanel {
 
     public CrudKurirView() {
         controller = new KurirController();
-        setLayout(new MigLayout("fill", "[grow]", "[][grow][]"));
+        setLayout(new BorderLayout());
+        setBackground(new Color(255, 250, 240)); // Background warna cream muda
 
-        // Title Label
-        JLabel titleLabel = new JLabel("Manajemen Kurir");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        add(titleLabel, "wrap, align center");
+        // Title Panel
+        JPanel titlePanel = new JPanel(new BorderLayout());
+        titlePanel.setBackground(new Color(255, 250, 240));
 
-        // Table
+        JLabel titleLabel = new JLabel("Manajemen Kurir", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+        titleLabel.setForeground(new Color(139, 0, 0));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        titlePanel.add(titleLabel, BorderLayout.CENTER);
+        add(titlePanel, BorderLayout.NORTH);
+
+        // Table Panel
+        JPanel tablePanel = new JPanel(new BorderLayout());
         tableModel = new DefaultTableModel(new String[]{"ID", "Nama", "Nomor Telepon", "Alamat", "Status"}, 0);
         table = new JTable(tableModel);
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-        JScrollPane scrollPane = new JScrollPane(table);
-        add(scrollPane, "grow, wrap");
+        setupTableProperties();
+        tablePanel.add(new JScrollPane(table), BorderLayout.CENTER);
+        tablePanel.setBackground(new Color(255, 250, 240));
+        add(tablePanel, BorderLayout.CENTER);
 
-        // Buttons
-        JPanel buttonPanel = new JPanel(new MigLayout("fill", "[grow, fill][grow, fill][grow, fill][grow, fill]"));
+       // Buttons Panel
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // Menggunakan FlowLayout
+        buttonPanel.setBackground(new Color(255, 250, 240)); // Cream background
+
         JButton addButton = new JButton("Tambah");
         JButton editButton = new JButton("Edit");
         JButton deleteButton = new JButton("Hapus");
         JButton refreshButton = new JButton("Refresh");
 
+        //style btns
+         addButton.setBackground(new Color(255, 160, 122));
+         addButton.setForeground(Color.WHITE);
+         addButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+         editButton.setBackground(new Color(255, 160, 122));
+         editButton.setForeground(Color.WHITE);
+         editButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+         deleteButton.setBackground(new Color(255, 160, 122));
+         deleteButton.setForeground(Color.WHITE);
+         deleteButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+        
+         refreshButton.setBackground(new Color(255, 160, 122));
+         refreshButton.setForeground(Color.WHITE);
+         refreshButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+
         buttonPanel.add(addButton);
         buttonPanel.add(editButton);
         buttonPanel.add(deleteButton);
         buttonPanel.add(refreshButton);
-        add(buttonPanel, "dock south");
+       add(buttonPanel, BorderLayout.SOUTH);
+
 
         // Load Data
         loadData();
@@ -52,6 +100,35 @@ public class CrudKurirView extends JPanel {
         deleteButton.addActionListener(e -> deleteKurir());
         refreshButton.addActionListener(e -> handleRefresh());
     }
+
+    private void setupTableProperties() {
+        table.setBackground(new Color(255, 239, 213)); // Light orange
+        table.setForeground(Color.BLACK);
+        table.setFont(new Font("SansSerif", Font.PLAIN, 14));
+
+        // Header styling
+        table.getTableHeader().setBackground(new Color(255, 160, 122)); // Light coral
+        table.getTableHeader().setForeground(Color.WHITE);
+        table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        // Alternating row colors
+        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? new Color(255, 250, 240) : new Color(255, 239, 213));
+                }
+                   setHorizontalAlignment(SwingConstants.CENTER);
+                return c;
+            }
+        };
+
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setCellRenderer(renderer);
+        }
+    }
+
 
     private void loadData() {
         tableModel.setRowCount(0); // Hapus data lama
@@ -82,7 +159,7 @@ public class CrudKurirView extends JPanel {
         }
     }
 
-    private void openKurirForm(Kurir kurir, boolean isEdit) {
+   private void openKurirForm(Kurir kurir, boolean isEdit) {
         JDialog dialog = new JDialog((Frame) null, isEdit ? "Edit Kurir" : "Tambah Kurir", true);
         dialog.setSize(400, 300);
         dialog.setLayout(new MigLayout("fillx", "[right][grow]", "[][][][][]"));
@@ -152,6 +229,7 @@ public class CrudKurirView extends JPanel {
 
         dialog.setVisible(true);
     }
+
 
     private void deleteKurir() {
         int selectedRow = table.getSelectedRow();
