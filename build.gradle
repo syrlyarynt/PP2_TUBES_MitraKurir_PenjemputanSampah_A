@@ -1,9 +1,13 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
-group = 'kelompok4.praktikumpemrograman2'
+group = 'kelompok4.praktikumpemrogramman2'
 version = '1.0-SNAPSHOT'
+
+// Set main class ke MainFrame
+mainClassName = 'kelompok4.praktikumpemrograman2.MainFrame'
 
 repositories {
     mavenCentral()
@@ -12,14 +16,36 @@ repositories {
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    // https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
     implementation 'com.mysql:mysql-connector-j:9.1.0'
-// https://mvnrepository.com/artifact/com.miglayout/miglayout
-    implementation 'com.miglayout:miglayout:3.7.4'
-// https://mvnrepository.com/artifact/org.mybatis/mybatis
+    implementation 'com.miglayout:miglayout-swing:11.4.2'
     implementation 'org.mybatis:mybatis:3.5.17'
+    implementation 'com.formdev:flatlaf:3.5.4'
+    implementation 'com.formdev:flatlaf-intellij-themes:3.5.4'
+    implementation 'org.slf4j:slf4j-api:2.0.16'
+    implementation 'com.itextpdf:itext7-core:7.2.5'
+//    implementation 'ch.qos.logback:logback-classic:1.4.7'
+//    implementation 'ch.qos.logback:logback-core:1.4.7'
+    implementation 'org.slf4j:slf4j-nop:2.0.16'
+}
 
+jar {
+    manifest {
+        attributes(
+                'Main-Class': mainClassName,
+                'Class-Path': configurations.runtimeClasspath.files.collect { it.name }.join(' ')
+        )
+    }
 
+    // Include semua dependencies dalam JAR
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    // Tambahkan ini untuk mengecualikan file signature
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
 }
 
 test {
